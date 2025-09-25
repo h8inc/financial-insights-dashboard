@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, createContext, useContext } from 'react'
+import { useEffect, useState, createContext, useContext, useCallback } from 'react'
 import { useChartData } from '@/hooks/useChartData'
 import { useDeltaComparison } from '@/hooks/useDeltaComparison'
 import { useAtom } from 'jotai'
@@ -31,7 +31,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
   const [isLoading, setIsLoading] = useAtom(isLoadingAtom)
   const [isInitialized, setIsInitialized] = useState(false)
 
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
     setIsLoading(true)
     try {
       // Load chart data and get period data for delta calculation
@@ -46,7 +46,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [loadChartData, updateDeltasFromPeriodData, setIsLoading])
 
   useEffect(() => {
     if (!isInitialized) {
