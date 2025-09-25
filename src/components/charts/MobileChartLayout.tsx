@@ -1,8 +1,7 @@
 'use client'
 
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown } from 'lucide-react'
+import { TrendingUp, TrendingDown } from 'lucide-react'
 import { ChartType } from '@/lib/types'
 import { useChartData } from '@/hooks/useChartData'
 import { useDeltaComparison } from '@/hooks/useDeltaComparison'
@@ -60,19 +59,6 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
   const currentData = getCurrentData()
   const currentDelta = getCurrentDelta()
   
-  // Calculate current value (sum of all data points)
-  const currentValue = currentData.reduce((sum, point) => sum + point.value, 0)
-  
-  // Format value as currency
-  const formatValue = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value)
-  }
-  
   // Generate mock chart data visualization
   const generateChartBars = () => {
     if (currentData.length === 0) return null
@@ -88,7 +74,7 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
               <div
                 className="bg-blue-500 rounded-t w-full transition-all duration-300 hover:bg-blue-600"
                 style={{ height: `${height}px` }}
-                title={`${point.date}: ${formatValue(point.value)}`}
+                title={`${point.date}: $${point.value.toLocaleString()}`}
               />
               <div className="text-xs text-gray-500 mt-1 transform -rotate-45 origin-left">
                 {new Date(point.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}

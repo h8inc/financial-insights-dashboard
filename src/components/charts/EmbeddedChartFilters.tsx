@@ -42,7 +42,7 @@ export const EmbeddedChartFilters = ({ chartType, className = '' }: EmbeddedChar
                 key={range.value}
                 variant={timeRange === range.value ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => updateTimeRange(range.value as any)}
+                onClick={() => updateTimeRange(range.value as '7D' | '30D' | '3M' | 'YTD')}
                 className="text-xs px-3 py-1 h-7"
               >
                 {range.short}
