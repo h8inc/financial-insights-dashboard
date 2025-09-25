@@ -7,7 +7,7 @@ import { ChartType } from '@/lib/types'
 import { useChartData } from '@/hooks/useChartData'
 import { useDeltaComparison } from '@/hooks/useDeltaComparison'
 import { useAtom } from 'jotai'
-import { isLoadingAtom } from '@/lib/atoms'
+import { isLoadingAtom, cashFlowModeAtom } from '@/lib/atoms'
 import { EmbeddedChartFilters } from './EmbeddedChartFilters'
 import { MobileChartLayout } from './MobileChartLayout'
 import { useResponsiveView } from '@/hooks/useResponsiveView'
@@ -21,15 +21,29 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
   const { cashFlowData, profitData, expensesData, revenueData } = useChartData()
   const { getCurrentDeltas } = useDeltaComparison()
   const [isLoading] = useAtom(isLoadingAtom)
+  const [cashFlowMode] = useAtom(cashFlowModeAtom)
   const { isMobileView } = useResponsiveView()
   
   const deltas = getCurrentDeltas()
   
-  // Get current data based on type
+  // Get current data based on type and mode
   const getCurrentData = () => {
     switch (type) {
       case ChartType.CASH_FLOW:
-        return cashFlowData
+        // For cash flow, transform data based on mode
+        if (cashFlowMode === 'balance') {
+          // Return balance data as ChartDataPoint format
+          return cashFlowData.map(point => ({
+            date: point.date,
+            value: point.balance
+          }))
+        } else {
+          // Return net flow data (activity mode)
+          return cashFlowData.map(point => ({
+            date: point.date,
+            value: point.value
+          }))
+        }
       case ChartType.PROFIT:
         return profitData
       case ChartType.EXPENSES:
@@ -78,7 +92,7 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
     }).format(value)
   }
   
-  // Generate mock chart data visualization
+  // Generate bar chart visualization
   const generateChartBars = () => {
     if (currentData.length === 0) return null
     
@@ -101,6 +115,71 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
             </div>
           )
         })}
+      </div>
+    )
+  }
+
+  // Generate line chart visualization
+  const generateChartLine = () => {
+    if (currentData.length === 0) return null
+    
+    const maxValue = Math.max(...currentData.map(point => point.value))
+    const minValue = Math.min(...currentData.map(point => point.value))
+    const valueRange = maxValue - minValue
+    
+    // Create SVG path for the line
+    const points = currentData.slice(-10).map((point, index) => {
+      const x = (index / (currentData.slice(-10).length - 1)) * 100
+      const y = 100 - ((point.value - minValue) / valueRange) * 80 // Leave 20% margin
+      return `${x},${y}`
+    }).join(' L')
+    
+    return (
+      <div className="relative h-64 px-4 py-4">
+        <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+          {/* Grid lines */}
+          <defs>
+            <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+              <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#f3f4f6" strokeWidth="0.5"/>
+            </pattern>
+          </defs>
+          <rect width="100" height="100" fill="url(#grid)" />
+          
+          {/* Line chart */}
+          <path
+            d={`M ${points}`}
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth="2"
+            className="transition-all duration-300"
+          />
+          
+          {/* Data points */}
+          {currentData.slice(-10).map((point, index) => {
+            const x = (index / (currentData.slice(-10).length - 1)) * 100
+            const y = 100 - ((point.value - minValue) / valueRange) * 80
+            return (
+              <circle
+                key={point.date}
+                cx={x}
+                cy={y}
+                r="2"
+                fill="#3b82f6"
+                className="transition-all duration-300 hover:r-3"
+                title={`${point.date}: ${formatValue(point.value)}`}
+              />
+            )
+          })}
+        </svg>
+        
+        {/* X-axis labels */}
+        <div className="absolute bottom-0 left-4 right-4 flex justify-between">
+          {currentData.slice(-10).map((point) => (
+            <div key={point.date} className="text-xs text-gray-500 transform -rotate-45 origin-left">
+              {new Date(point.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </div>
+          ))}
+        </div>
       </div>
     )
   }
@@ -128,12 +207,22 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
       <CardHeader>
         <div className="flex justify-between items-start mb-4">
           <div>
-            <CardTitle>{title}</CardTitle>
+            <CardTitle>
+              {title}
+              {type === ChartType.CASH_FLOW && (
+                <span className="text-sm font-normal text-gray-500 ml-2">
+                  ({cashFlowMode === 'activity' ? 'Activity' : 'Balance'} Mode)
+                </span>
+              )}
+            </CardTitle>
             <div className="text-2xl font-bold text-gray-900 mt-1">
               {formatValue(currentValue)}
             </div>
             <div className="text-sm text-gray-500">
-              vs last period
+              {type === ChartType.CASH_FLOW && cashFlowMode === 'balance' 
+                ? 'Current Balance' 
+                : 'vs last period'
+              }
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -164,7 +253,10 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
       <CardContent>
         <div className="h-96 bg-gray-50 rounded-lg p-4">
           {currentData.length > 0 ? (
-            generateChartBars()
+            // Choose chart type based on cash flow mode
+            type === ChartType.CASH_FLOW && cashFlowMode === 'balance' 
+              ? generateChartLine() 
+              : generateChartBars()
           ) : (
             <div className="flex items-center justify-center h-full">
               <p className="text-gray-500">No data available</p>
