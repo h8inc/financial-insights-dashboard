@@ -10,6 +10,7 @@ import { isLoadingAtom, cashFlowModeAtom } from '@/lib/atoms'
 import { MobileChartModeSwitcher } from './MobileChartModeSwitcher'
 import { MobileTimeFilter } from './MobileTimeFilter'
 import { useResponsiveView } from '@/hooks/useResponsiveView'
+import { D3BarChart, D3LineChart } from './D3Charts'
 
 interface MobileChartLayoutProps {
   type: ChartType
@@ -73,97 +74,50 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
   const currentData = getCurrentData()
   const currentDelta = getCurrentDelta()
   
-  // Generate bar chart visualization for mobile
-  const generateChartBars = () => {
+  // Render D3 chart based on type and mode for mobile
+  const renderMobileD3Chart = () => {
     if (currentData.length === 0) return null
-    
-    const maxValue = Math.max(...currentData.map(point => point.value))
-    
-    return (
-      <div className="flex items-end justify-between h-48 px-2 py-4 space-x-1">
-        {currentData.slice(-10).map((point) => {
-          const height = (point.value / maxValue) * 150
-          return (
-            <div key={point.date} className="flex flex-col items-center flex-1">
-              <div
-                className="bg-blue-500 rounded-t w-full transition-all duration-300 hover:bg-blue-600"
-                style={{ height: `${height}px` }}
-                title={`${point.date}: $${point.value.toLocaleString()}`}
-              />
-              <div className="text-xs text-gray-500 mt-1 transform -rotate-45 origin-left">
-                {new Date(point.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    )
-  }
 
-  // Generate line chart visualization for mobile
-  const generateChartLine = () => {
-    if (currentData.length === 0) return null
-    
-    const maxValue = Math.max(...currentData.map(point => point.value))
-    const minValue = Math.min(...currentData.map(point => point.value))
-    const valueRange = maxValue - minValue
-    
-    // Create SVG path for the line
-    const points = currentData.slice(-10).map((point, index) => {
-      const x = (index / (currentData.slice(-10).length - 1)) * 100
-      const y = 100 - ((point.value - minValue) / valueRange) * 80 // Leave 20% margin
-      return `${x},${y}`
-    }).join(' L')
-    
-    return (
-      <div className="relative h-48 px-2 py-4">
-        <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-          {/* Grid lines */}
-          <defs>
-            <pattern id="mobile-grid" width="10" height="10" patternUnits="userSpaceOnUse">
-              <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#f3f4f6" strokeWidth="0.5"/>
-            </pattern>
-          </defs>
-          <rect width="100" height="100" fill="url(#mobile-grid)" />
-          
-          {/* Line chart */}
-          <path
-            d={`M ${points}`}
-            fill="none"
-            stroke="#3b82f6"
-            strokeWidth="2"
-            className="transition-all duration-300"
+    const chartProps = {
+      width: 400,
+      height: 200,
+      className: "w-full h-full",
+    }
+
+    switch (type) {
+      case ChartType.CASH_FLOW:
+        // Temporarily use bar chart for cash flow until D3CashFlowChart is fixed
+        return (
+          <D3BarChart {...chartProps} data={cashFlowData} color="#3b82f6" />
+        )
+      case ChartType.PROFIT:
+        return (
+          <D3BarChart
+            {...chartProps}
+            data={profitData}
+            color="#10b981"
           />
-          
-          {/* Data points */}
-          {currentData.slice(-10).map((point, index) => {
-            const x = (index / (currentData.slice(-10).length - 1)) * 100
-            const y = 100 - ((point.value - minValue) / valueRange) * 80
-            return (
-              <circle
-                key={point.date}
-                cx={x}
-                cy={y}
-                r="2"
-                fill="#3b82f6"
-                className="transition-all duration-300 hover:r-3"
-              >
-                <title>{`${point.date}: $${point.value.toLocaleString()}`}</title>
-              </circle>
-            )
-          })}
-        </svg>
-        
-        {/* X-axis labels */}
-        <div className="absolute bottom-0 left-2 right-2 flex justify-between">
-          {currentData.slice(-10).map((point) => (
-            <div key={point.date} className="text-xs text-gray-500 transform -rotate-45 origin-left">
-              {new Date(point.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-            </div>
-          ))}
-        </div>
-      </div>
-    )
+        )
+      case ChartType.EXPENSES:
+        return (
+          <D3BarChart
+            {...chartProps}
+            data={expensesData}
+            color="#ef4444"
+          />
+        )
+      case ChartType.REVENUE:
+        return (
+          <D3LineChart
+            {...chartProps}
+            data={revenueData}
+            color="#3b82f6"
+            showArea={true}
+          />
+        )
+      default:
+        return null
+    }
   }
 
   // Only render on mobile
@@ -235,10 +189,7 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
           {/* 3c. Chart Visualization - BELOW LEGEND */}
           <div className="bg-gray-50 rounded-lg p-2">
             {currentData.length > 0 ? (
-              // Choose chart type based on cash flow mode
-              type === ChartType.CASH_FLOW && cashFlowMode === 'balance' 
-                ? generateChartLine() 
-                : generateChartBars()
+              renderMobileD3Chart()
             ) : (
               <div className="flex items-center justify-center h-48">
                 <p className="text-gray-500">No data available</p>

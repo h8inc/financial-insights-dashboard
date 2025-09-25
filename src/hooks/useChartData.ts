@@ -1,3 +1,4 @@
+import React from 'react'
 import { useAtom } from 'jotai'
 import { timeRangeAtom, cashFlowDataAtom, profitDataAtom, expensesDataAtom, revenueDataAtom } from '@/lib/atoms'
 import { ChartDataPoint, CashFlowDataPoint } from '@/lib/types'
@@ -156,6 +157,7 @@ export const useChartData = () => {
     const expensesPeriods = generatePeriodData('expenses')
     const revenuePeriods = generatePeriodData('revenue')
     
+    // Ensure data is set properly
     setCashFlowData(cashFlowPeriods.current)
     setProfitData(profitPeriods.current)
     setExpensesData(expensesPeriods.current)
@@ -169,6 +171,13 @@ export const useChartData = () => {
       revenue: revenuePeriods
     }
   }
+
+  // Auto-load data on mount if not already loaded
+  React.useEffect(() => {
+    if (cashFlowData.length === 0 && profitData.length === 0) {
+      loadChartData()
+    }
+  }, [cashFlowData.length, profitData.length, loadChartData])
 
   return {
     cashFlowData,

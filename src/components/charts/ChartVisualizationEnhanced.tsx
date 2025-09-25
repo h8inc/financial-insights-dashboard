@@ -1,8 +1,10 @@
 'use client'
 
+import React, { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown, Settings } from 'lucide-react'
 import { ChartType, ChartDataPoint, CashFlowDataPoint } from '@/lib/types'
 import { useChartData } from '@/hooks/useChartData'
 import { useDeltaComparison } from '@/hooks/useDeltaComparison'
@@ -12,20 +14,22 @@ import { EmbeddedChartFilters } from './EmbeddedChartFilters'
 import { MobileChartLayout } from './MobileChartLayout'
 import { useResponsiveView } from '@/hooks/useResponsiveView'
 import { D3BarChart, D3LineChart } from './D3Charts'
-import { useState } from 'react'
+import { D3ChartConfigurator } from './D3ChartConfigurator'
 
 interface ChartVisualizationProps {
   type: ChartType
   title: string
+  enableAdvancedMode?: boolean
 }
 
-export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => {
+export const ChartVisualization = ({ type, title, enableAdvancedMode = false }: ChartVisualizationProps) => {
   const { cashFlowData, profitData, expensesData, revenueData } = useChartData()
   const { getCurrentDeltas } = useDeltaComparison()
   const [isLoading] = useAtom(isLoadingAtom)
   const [cashFlowMode] = useAtom(cashFlowModeAtom)
   const { isMobileView } = useResponsiveView()
   const [hoveredPoint, setHoveredPoint] = useState<ChartDataPoint | CashFlowDataPoint | null>(null)
+  const [showAdvancedMode, setShowAdvancedMode] = useState(false)
   
   const deltas = getCurrentDeltas()
   
@@ -141,6 +145,56 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
         return null
     }
   }
+
+  // Get data for advanced configurator
+  const getAdvancedData = () => {
+    switch (type) {
+      case ChartType.CASH_FLOW:
+        return cashFlowMode === 'balance' 
+          ? cashFlowData.map(point => ({ date: point.date, value: point.balance }))
+          : cashFlowData.map(point => ({ date: point.date, value: point.value }))
+      case ChartType.PROFIT:
+        return profitData
+      case ChartType.EXPENSES:
+        return expensesData
+      case ChartType.REVENUE:
+        return revenueData
+      default:
+        return []
+    }
+  }
+
+  // Get default chart type for advanced mode
+  const getDefaultChartType = () => {
+    switch (type) {
+      case ChartType.CASH_FLOW:
+        return cashFlowMode === 'balance' ? 'line' : 'bar'
+      case ChartType.PROFIT:
+        return 'bar'
+      case ChartType.EXPENSES:
+        return 'bar'
+      case ChartType.REVENUE:
+        return 'area'
+      default:
+        return 'line'
+    }
+  }
+
+  // Get default color for advanced mode
+  const getDefaultColor = () => {
+    switch (type) {
+      case ChartType.CASH_FLOW:
+        return '#3b82f6'
+      case ChartType.PROFIT:
+        return '#10b981'
+      case ChartType.EXPENSES:
+        return '#ef4444'
+      case ChartType.REVENUE:
+        return '#8b5cf6'
+      default:
+        return '#3b82f6'
+    }
+  }
   
   if (isLoading) {
     return (
@@ -157,6 +211,18 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
           </div>
         </CardContent>
       </Card>
+    )
+  }
+
+  // Show advanced mode if enabled and requested
+  if (enableAdvancedMode && showAdvancedMode) {
+    return (
+      <D3ChartConfigurator
+        data={getAdvancedData()}
+        title={title}
+        defaultChartType={getDefaultChartType() as 'line' | 'bar' | 'area'}
+        defaultColor={getDefaultColor()}
+      />
     )
   }
   
@@ -200,6 +266,17 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
               )}
               {currentDelta.percentage.toFixed(1)}%
             </Badge>
+            {enableAdvancedMode && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowAdvancedMode(!showAdvancedMode)}
+                className="ml-2"
+              >
+                <Settings className="h-3 w-3 mr-1" />
+                {showAdvancedMode ? 'Simple' : 'Advanced'}
+              </Button>
+            )}
           </div>
         </div>
         
@@ -229,6 +306,12 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
               <p className="text-blue-600">
                 Value: ${hoveredPoint.value.toLocaleString()}
               </p>
+              {'inflow' in hoveredPoint && (
+                <div className="mt-1 text-xs">
+                  <span className="text-green-600">In: ${hoveredPoint.inflow.toLocaleString()}</span>
+                  <span className="text-red-600 ml-2">Out: ${hoveredPoint.outflow.toLocaleString()}</span>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -236,4 +319,3 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
     </Card>
   )
 }
-
