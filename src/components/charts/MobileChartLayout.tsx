@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown } from 'lucide-react'
 import { ChartType } from '@/lib/types'
@@ -8,16 +8,16 @@ import { useChartData } from '@/hooks/useChartData'
 import { useDeltaComparison } from '@/hooks/useDeltaComparison'
 import { useAtom } from 'jotai'
 import { isLoadingAtom } from '@/lib/atoms'
-import { EmbeddedChartFilters } from './EmbeddedChartFilters'
-import { MobileChartLayout } from './MobileChartLayout'
+import { MobileChartModeSwitcher } from './MobileChartModeSwitcher'
+import { MobileTimeFilter } from './MobileTimeFilter'
 import { useResponsiveView } from '@/hooks/useResponsiveView'
 
-interface ChartVisualizationProps {
+interface MobileChartLayoutProps {
   type: ChartType
   title: string
 }
 
-export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => {
+export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
   const { cashFlowData, profitData, expensesData, revenueData } = useChartData()
   const { getCurrentDeltas } = useDeltaComparison()
   const [isLoading] = useAtom(isLoadingAtom)
@@ -62,11 +62,6 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
   
   // Calculate current value (sum of all data points)
   const currentValue = currentData.reduce((sum, point) => sum + point.value, 0)
-
-  // Render mobile layout if on mobile
-  if (isMobileView) {
-    return <MobileChartLayout type={type} title={title} />
-  }
   
   // Format value as currency
   const formatValue = (value: number) => {
@@ -85,9 +80,9 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
     const maxValue = Math.max(...currentData.map(point => point.value))
     
     return (
-      <div className="flex items-end justify-between h-64 px-4 py-4 space-x-1">
+      <div className="flex items-end justify-between h-48 px-2 py-4 space-x-1">
         {currentData.slice(-10).map((point) => {
-          const height = (point.value / maxValue) * 200
+          const height = (point.value / maxValue) * 150
           return (
             <div key={point.date} className="flex flex-col items-center flex-1">
               <div
@@ -95,7 +90,7 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
                 style={{ height: `${height}px` }}
                 title={`${point.date}: ${formatValue(point.value)}`}
               />
-              <div className="text-xs text-gray-500 mt-2 transform -rotate-45 origin-left">
+              <div className="text-xs text-gray-500 mt-1 transform -rotate-45 origin-left">
                 {new Date(point.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               </div>
             </div>
@@ -104,19 +99,19 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
       </div>
     )
   }
-  
+
+  // Only render on mobile
+  if (!isMobileView) {
+    return null
+  }
+
   if (isLoading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>{title}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-96 bg-gray-50 rounded-lg flex items-center justify-center">
-            <div className="animate-pulse">
-              <div className="h-4 bg-gray-200 rounded w-48 mb-4"></div>
-              <div className="h-64 bg-gray-200 rounded"></div>
-            </div>
+        <CardContent className="p-4">
+          <div className="animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-32 mb-4"></div>
+            <div className="h-48 bg-gray-200 rounded"></div>
           </div>
         </CardContent>
       </Card>
@@ -124,59 +119,53 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
   }
   
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <CardTitle>{title}</CardTitle>
-            <div className="text-2xl font-bold text-gray-900 mt-1">
-              {formatValue(currentValue)}
+    <div className="space-y-4">
+      {/* 1. Date Filter - TOP OF SCREEN */}
+      <MobileTimeFilter />
+      
+      {/* 2. Headline with Text */}
+      <div className="text-center">
+        <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+        <p className="text-sm text-gray-600 mt-1">Track your financial performance</p>
+      </div>
+      
+      {/* 3. Chart Card with proper hierarchy */}
+      <Card>
+        <CardContent className="p-4 space-y-4">
+          {/* 3a. Activity/Balance Switcher - TOP OF CHART CARD (only for cash flow) */}
+          <MobileChartModeSwitcher chartType={type} />
+          
+          {/* 3b. Legend - BELOW SWITCHER (or at top if no switcher) */}
+          <div className="flex items-center justify-center space-x-4 text-xs text-gray-600">
+            <div className="flex items-center space-x-1">
+              <div className="w-3 h-3 bg-blue-500 rounded"></div>
+              <span>Data</span>
             </div>
-            <div className="text-sm text-gray-500">
-              vs last period
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
             {currentDelta.trend === 'up' ? (
-              <TrendingUp className="h-4 w-4 text-green-600" />
+              <div className="flex items-center space-x-1 text-green-600">
+                <TrendingUp className="h-3 w-3" />
+                <span>+{currentDelta.percentage.toFixed(1)}%</span>
+              </div>
             ) : (
-              <TrendingDown className="h-4 w-4 text-red-600" />
+              <div className="flex items-center space-x-1 text-red-600">
+                <TrendingDown className="h-3 w-3" />
+                <span>{currentDelta.percentage.toFixed(1)}%</span>
+              </div>
             )}
-            <Badge 
-              variant={currentDelta.trend === 'up' ? 'default' : 'destructive'}
-              className="text-xs"
-            >
-              {currentDelta.trend === 'up' ? (
-                <ArrowUpRight className="h-3 w-3 mr-1" />
-              ) : (
-                <ArrowDownRight className="h-3 w-3 mr-1" />
-              )}
-              {currentDelta.percentage.toFixed(1)}%
-            </Badge>
           </div>
-        </div>
-        
-        {/* Embedded Filters for Desktop */}
-        {!isMobileView && (
-          <EmbeddedChartFilters chartType={type} className="mt-4" />
-        )}
-      </CardHeader>
-      <CardContent>
-        <div className="h-96 bg-gray-50 rounded-lg p-4">
-          {currentData.length > 0 ? (
-            generateChartBars()
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-gray-500">No data available</p>
-            </div>
-          )}
-        </div>
-        <div className="mt-4 text-sm text-gray-600">
-          <p>Showing {currentData.length} data points</p>
-          <p>Period: {currentData[0]?.date} to {currentData[currentData.length - 1]?.date}</p>
-        </div>
-      </CardContent>
-    </Card>
+          
+          {/* 3c. Chart Visualization - BELOW LEGEND */}
+          <div className="bg-gray-50 rounded-lg p-2">
+            {currentData.length > 0 ? (
+              generateChartBars()
+            ) : (
+              <div className="flex items-center justify-center h-48">
+                <p className="text-gray-500">No data available</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
-

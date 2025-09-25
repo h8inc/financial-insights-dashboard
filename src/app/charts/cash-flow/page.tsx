@@ -5,7 +5,6 @@ import { DataProvider } from '@/components/DataProvider'
 import { ChartVisualization } from '@/components/charts/ChartVisualization'
 import { DeltaDisplay } from '@/components/charts/DeltaDisplay'
 import { TransactionBreakdown } from '@/components/charts/TransactionBreakdown'
-import { Filters } from '@/components/charts/Filters'
 import { MobileHeader } from '@/components/MobileHeader'
 import { ResponsiveWrapper } from '@/components/ResponsiveWrapper'
 import { ChartType } from '@/lib/types'
@@ -62,12 +61,11 @@ const CashFlowContent = () => {
             mobileClassName="space-y-4 order-2"
             desktopClassName="space-y-4 md:space-y-6 order-2"
           >
-            {/* Mobile: Show filters first, then delta, then transactions */}
+            {/* Mobile: Show delta first, then transactions */}
             <ResponsiveWrapper
               mobileClassName="space-y-4"
               desktopClassName="md:hidden space-y-4"
             >
-              <Filters type={ChartType.CASH_FLOW} />
               <DeltaDisplay type={ChartType.CASH_FLOW} />
             </ResponsiveWrapper>
             
@@ -76,7 +74,6 @@ const CashFlowContent = () => {
               mobileClassName="hidden"
               desktopClassName="hidden md:block space-y-6"
             >
-              <Filters type={ChartType.CASH_FLOW} />
               <DeltaDisplay type={ChartType.CASH_FLOW} />
               <TransactionBreakdown type={ChartType.CASH_FLOW} />
             </ResponsiveWrapper>

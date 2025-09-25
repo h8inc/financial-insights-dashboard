@@ -5,8 +5,8 @@ import { DataProvider } from '@/components/DataProvider'
 import { ChartVisualization } from '@/components/charts/ChartVisualization'
 import { DeltaDisplay } from '@/components/charts/DeltaDisplay'
 import { TransactionBreakdown } from '@/components/charts/TransactionBreakdown'
-import { Filters } from '@/components/charts/Filters'
 import { MobileHeader } from '@/components/MobileHeader'
+import { ResponsiveWrapper } from '@/components/ResponsiveWrapper'
 import { ChartType } from '@/lib/types'
 
 const ProfitContent = () => {
@@ -36,27 +36,38 @@ const ProfitContent = () => {
       </div>
 
       {/* Content Layout - Mobile Optimized */}
-      <div className="container mx-auto p-4 md:p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+      <ResponsiveWrapper
+        className="container mx-auto"
+        mobileClassName="p-4"
+        desktopClassName="p-4 md:p-6"
+      >
+        <ResponsiveWrapper
+          mobileClassName="grid grid-cols-1 gap-4"
+          desktopClassName="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6"
+        >
           {/* Main Chart - Full width on mobile, 2/3 on desktop */}
-          <div className="lg:col-span-2 order-1">
+          <ResponsiveWrapper
+            mobileClassName="order-1"
+            desktopClassName="lg:col-span-2 order-1"
+          >
             <ChartVisualization 
               type={ChartType.PROFIT}
               title="Profit Chart"
             />
-          </div>
+          </ResponsiveWrapper>
 
           {/* Sidebar - Stacked on mobile, sidebar on desktop */}
-          <div className="space-y-4 md:space-y-6 order-2">
-            {/* Mobile: Show filters first, then delta, then transactions */}
+          <ResponsiveWrapper
+            mobileClassName="space-y-4 order-2"
+            desktopClassName="space-y-4 md:space-y-6 order-2"
+          >
+            {/* Mobile: Show delta first, then transactions */}
             <div className="md:hidden space-y-4">
-              <Filters type={ChartType.PROFIT} />
               <DeltaDisplay type={ChartType.PROFIT} />
             </div>
             
             {/* Desktop: Normal order */}
             <div className="hidden md:block space-y-6">
-              <Filters type={ChartType.PROFIT} />
               <DeltaDisplay type={ChartType.PROFIT} />
               <TransactionBreakdown type={ChartType.PROFIT} />
             </div>
@@ -65,9 +76,9 @@ const ProfitContent = () => {
             <div className="md:hidden">
               <TransactionBreakdown type={ChartType.PROFIT} />
             </div>
-          </div>
-        </div>
-      </div>
+          </ResponsiveWrapper>
+        </ResponsiveWrapper>
+      </ResponsiveWrapper>
     </div>
   )
 }
