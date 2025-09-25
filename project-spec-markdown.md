@@ -1,6 +1,27 @@
 # Financial Dashboard Development Guide
 *Complete architecture, setup, and implementation roadmap*
 
+
+### About ME
+- **Product Designer** with some coding experience and product management background
+- **NOT a senior developer** - need detailed explanations and context
+- **Learning-focused approach** - want to understand the "why" behind every decision
+- **Incremental changes preferred** - small steps rather than large modifications
+
+### Development Approach Guidelines
+- 📚 **Educational Context**: Always explain concepts with reasoning and background
+- 🔍 **Break Down Complexity**: Split complex topics into digestible parts
+- 🛠️ **Step-by-Step Process**: Explain each code change individually with comments
+- ⚠️ **Risk Alerts**: Use clear warnings for larger or risky changes
+- ✋ **Confirmation Required**: Always pause and wait for approval before significant modifications
+
+### Visual Alert System
+- 👍 **Safe Changes**: Small, low-risk modifications
+- ⚠️ **MODERATE RISK**: Medium complexity changes requiring review
+- 🔴 **HIGH RISK MODIFICATION**: Large changes that could break functionality
+- 🚨 **LARGE CHANGE ALERT**: Major architectural or structural modifications
+
+
 ## Project Overview
 Building a reusable, highly customizable financial dashboard in Next.js/React focused on cash flow visualization with cross-device responsive design and drill-down functionality.
 

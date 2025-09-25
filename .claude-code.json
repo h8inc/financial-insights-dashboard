@@ -1,0 +1,10 @@
+{
+  "framework": "next.js",
+  "typescript": true,
+  "tailwind": true,
+  "ui_library": "shadcn/ui",
+  "state_management": "jotai",
+  "project_type": "financial-dashboard",
+  "styling_approach": "tailwind-utilities",
+  "animation_library": "framer-motion"
+}
