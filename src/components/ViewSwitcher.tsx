@@ -14,13 +14,6 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator
-} from '@/components/ui/dropdown-menu'
 import { useResponsiveView } from '@/hooks/useResponsiveView'
 import { SubscriptionInfoSheet } from '@/components/SubscriptionInfoSheet'
 import { cn } from '@/lib/utils'
@@ -43,17 +36,12 @@ export function ViewSwitcher({
     viewMode,
     deviceType, 
     activeView, 
-    canToggleView,
     shouldShowFrame,
     toggleViewMode,
-    cycleViewMode,
     setSpecificViewMode,
-    screenDimensions,
     
     // Subscription properties
-    subscriptionMode,
     activeSubscription,
-    canToggleSubscription,
     setSpecificSubscriptionMode
   } = useResponsiveView()
 

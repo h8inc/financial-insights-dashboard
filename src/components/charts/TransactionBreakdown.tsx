@@ -111,7 +111,7 @@ export const TransactionBreakdown = ({ type }: TransactionBreakdownProps) => {
   }
   
   const getTransactionType = (type: ChartType, category: string): 'income' | 'expense' => {
-    const incomeCategories = {
+    const incomeCategories: Record<ChartType, string[]> = {
       [ChartType.CASH_FLOW]: ['Sales', 'Investments', 'Refunds'],
       [ChartType.PROFIT]: ['Revenue'],
       [ChartType.EXPENSES]: [],
