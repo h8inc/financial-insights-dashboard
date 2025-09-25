@@ -166,8 +166,9 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
                 r="2"
                 fill="#3b82f6"
                 className="transition-all duration-300 hover:r-3"
-                title={`${point.date}: ${formatValue(point.value)}`}
-              />
+              >
+                <title>{`${point.date}: ${formatValue(point.value)}`}</title>
+              </circle>
             )
           })}
         </svg>

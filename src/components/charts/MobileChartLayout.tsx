@@ -147,8 +147,9 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
                 r="2"
                 fill="#3b82f6"
                 className="transition-all duration-300 hover:r-3"
-                title={`${point.date}: $${point.value.toLocaleString()}`}
-              />
+              >
+                <title>{`${point.date}: $${point.value.toLocaleString()}`}</title>
+              </circle>
             )
           })}
         </svg>
