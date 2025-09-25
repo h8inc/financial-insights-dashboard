@@ -3,13 +3,12 @@
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown, RefreshCw } from 'lucide-react'
+import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown } from 'lucide-react'
 import { ChartType } from '@/lib/types'
 import { useChartData } from '@/hooks/useChartData'
 import { useDeltaComparison } from '@/hooks/useDeltaComparison'
 import { useAtom } from 'jotai'
 import { isLoadingAtom } from '@/lib/atoms'
-import { Button } from '@/components/ui/button'
 
 interface DashboardCardProps {
   type: ChartType

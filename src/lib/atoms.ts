@@ -1,15 +1,16 @@
 import { atom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
+import { ChartDataPoint, CashFlowDataPoint } from './types'
 
 // Time range filter atoms
 export const timeRangeAtom = atom<'7D' | '30D' | '3M' | 'YTD' | 'custom'>('30D')
 export const customDateRangeAtom = atom<{ start: Date; end: Date } | null>(null)
 
 // Chart data atoms
-export const cashFlowDataAtom = atom<any[]>([])
-export const profitDataAtom = atom<any[]>([])
-export const expensesDataAtom = atom<any[]>([])
-export const revenueDataAtom = atom<any[]>([])
+export const cashFlowDataAtom = atom<CashFlowDataPoint[]>([])
+export const profitDataAtom = atom<ChartDataPoint[]>([])
+export const expensesDataAtom = atom<ChartDataPoint[]>([])
+export const revenueDataAtom = atom<ChartDataPoint[]>([])
 
 // Delta comparison atoms
 export const cashFlowDeltaAtom = atom<number>(0)

@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ChartType } from '@/lib/types'
+import { ChartType, TimeRange } from '@/lib/types'
 import { useFilters } from '@/hooks/useFilters'
 import { useDataContext } from '@/components/DataProvider'
 import { RefreshCw } from 'lucide-react'
@@ -16,7 +16,7 @@ export const Filters = ({ type }: FiltersProps) => {
   const { timeRange, updateTimeRange, cashFlowMode, toggleCashFlowMode } = useFilters()
   const { refreshData, isLoading } = useDataContext()
   
-  const timeRanges = [
+  const timeRanges: { value: TimeRange; label: string }[] = [
     { value: '7D', label: 'Last 7 Days' },
     { value: '30D', label: 'Last 30 Days' },
     { value: '3M', label: 'Last 3 Months' },
@@ -39,7 +39,7 @@ export const Filters = ({ type }: FiltersProps) => {
                 key={range.value}
                 variant={timeRange === range.value ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => updateTimeRange(range.value as any)}
+                onClick={() => updateTimeRange(range.value)}
                 className="text-xs"
               >
                 {range.label}

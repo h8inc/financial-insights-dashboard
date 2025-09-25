@@ -2,7 +2,6 @@
 
 import React from 'react'
 import { useResponsiveView } from '@/hooks/useResponsiveView'
-import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
 interface ResponsiveContainerProps {
@@ -15,10 +14,9 @@ interface ResponsiveContainerProps {
 export function ResponsiveContainer({ 
   children, 
   className,
-  frameStyle = 'iphone',
-  showFrameControls = true
+  frameStyle = 'iphone'
 }: ResponsiveContainerProps) {
-  const { shouldShowFrame, activeView, deviceType } = useResponsiveView()
+  const { shouldShowFrame, deviceType } = useResponsiveView()
   
   // Native mobile experience - no frame needed
   if (deviceType === 'mobile' || !shouldShowFrame) {

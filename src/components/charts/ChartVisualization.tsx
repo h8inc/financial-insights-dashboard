@@ -77,7 +77,7 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
     
     return (
       <div className="flex items-end justify-between h-64 px-4 py-4 space-x-1">
-        {currentData.slice(-10).map((point, index) => {
+        {currentData.slice(-10).map((point) => {
           const height = (point.value / maxValue) * 200
           return (
             <div key={point.date} className="flex flex-col items-center flex-1">

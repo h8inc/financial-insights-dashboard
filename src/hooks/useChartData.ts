@@ -1,6 +1,6 @@
 import { useAtom } from 'jotai'
 import { timeRangeAtom, cashFlowDataAtom, profitDataAtom, expensesDataAtom, revenueDataAtom } from '@/lib/atoms'
-import { ChartDataPoint, CashFlowDataPoint } from '@/lib/types'
+import { ChartDataPoint } from '@/lib/types'
 
 export const useChartData = () => {
   const [timeRange] = useAtom(timeRangeAtom)

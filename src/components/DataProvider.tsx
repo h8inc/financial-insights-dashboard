@@ -52,7 +52,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
     if (!isInitialized) {
       refreshData()
     }
-  }, [isInitialized])
+  }, [isInitialized, refreshData])
 
   return (
     <DataContext.Provider value={{ refreshData, isLoading }}>

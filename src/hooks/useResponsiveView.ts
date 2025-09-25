@@ -32,7 +32,7 @@ export function useResponsiveView() {
 
   // Subscription tier atoms
   const [subscriptionMode, setSubscriptionMode] = useAtom(subscriptionModeAtom)
-  const [userType, setUserType] = useAtom(userTypeAtom)
+  const [userType] = useAtom(userTypeAtom)
   const [activeSubscription] = useAtom(activeSubscriptionAtom)
   const [permissions] = useAtom(contentPermissionsAtom)
   const [componentContext] = useAtom(componentContextAtom)

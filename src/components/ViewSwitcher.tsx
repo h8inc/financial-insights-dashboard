@@ -54,10 +54,7 @@ export function ViewSwitcher({
     subscriptionMode,
     activeSubscription,
     canToggleSubscription,
-    toggleSubscriptionMode,
-    cycleSubscriptionMode,
-    setSpecificSubscriptionMode,
-    componentContext
+    setSpecificSubscriptionMode
   } = useResponsiveView()
 
   // Only hide on actual mobile devices, not when desktop users choose mobile view
@@ -77,27 +74,6 @@ export function ViewSwitcher({
     return activeView === 'mobile' ? 'Mobile View' : 'Desktop View'
   }
 
-  const getDeviceLabel = () => {
-    return `${deviceType} • ${screenDimensions.width}×${screenDimensions.height}`
-  }
-
-  // Subscription helper functions
-  const getSubscriptionIcon = (subscription: string) => {
-    switch (subscription) {
-      case 'freemium': return <Lock className="h-4 w-4" />
-      case 'paid': return <Crown className="h-4 w-4" />
-      default: return <Unlock className="h-4 w-4" />
-    }
-  }
-
-  const getSubscriptionLabel = () => {
-    if (subscriptionMode === 'auto') return `Auto (${activeSubscription})`
-    return activeSubscription === 'paid' ? 'Pro Plan' : 'Free Plan'
-  }
-
-  const getSubscriptionBadgeText = () => {
-    return activeSubscription === 'paid' ? 'Pro' : 'Free'
-  }
 
   // Compact variant for headers
   if (variant === 'compact') {

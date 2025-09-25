@@ -12,7 +12,7 @@ interface TransactionBreakdownProps {
 }
 
 export const TransactionBreakdown = ({ type }: TransactionBreakdownProps) => {
-  const { cashFlowData, profitData, expensesData, revenueData } = useChartData()
+  const { } = useChartData()
   const [isLoading] = useAtom(isLoadingAtom)
   
   // Generate mock transaction data based on chart type
