@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ChartType, Transaction } from '@/lib/types'
 import { useChartDataConsumer } from '@/hooks/useChartDataConsumer'
-import { useAtom } from 'jotai'
-import { isLoadingAtom } from '@/lib/atoms'
+// import { useAtom } from 'jotai'
+// import { isLoadingAtom } from '@/lib/atoms'
 
 interface TransactionBreakdownProps {
   type: ChartType

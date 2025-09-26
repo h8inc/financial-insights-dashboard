@@ -7,8 +7,8 @@ import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown } from 'lucide-r
 import { ChartType } from '@/lib/types'
 import { useChartDataConsumer } from '@/hooks/useChartDataConsumer'
 import { useDeltaComparison } from '@/hooks/useDeltaComparison'
-import { useAtom } from 'jotai'
-import { isLoadingAtom } from '@/lib/atoms'
+// import { useAtom } from 'jotai'
+// import { isLoadingAtom } from '@/lib/atoms'
 
 interface DashboardCardProps {
   type: ChartType

@@ -45,12 +45,12 @@ export const useEnhancedChartData = () => {
       if (!forceRefresh && DataPersistenceManager.isCacheValid()) {
         const cached = await DataPersistenceManager.loadCashFlowData()
         if (cached.data && cached.timeRange === timeRange) {
-          console.log('📦 Loading cash flow data from cache')
+              // console.log('📦 Loading cash flow data from cache')
           return cached.data
         }
       }
 
-      console.log('🌐 Fetching cash flow data from API')
+      // console.log('🌐 Fetching cash flow data from API')
 
       // Fetch from mock API
       const response = await MockApiService.getCashFlowData(timeRange)
@@ -59,10 +59,7 @@ export const useEnhancedChartData = () => {
         // Validate the data
         const validatedData = CashFlowDataPointSchema.array().parse(response.data)
         
-        console.log('✅ Cash flow data fetched', {
-          timeRange,
-          points: validatedData.length,
-        })
+        // console.log('✅ Cash flow data fetched', { timeRange, points: validatedData.length })
 
         // Save to cache
         await DataPersistenceManager.saveCashFlowData(validatedData, timeRange)
@@ -191,7 +188,7 @@ export const useEnhancedChartData = () => {
   // Load data ONLY once when component mounts and data is not initialized
   useEffect(() => {
     if (!isInitialized && !isLoading) {
-      console.log('🚀 Initial data loading...')
+      // console.log('🚀 Initial data loading...')
       setIsLoading(true)
       
       // Load data directly without complex callbacks
@@ -207,13 +204,7 @@ export const useEnhancedChartData = () => {
         setRevenueData(revenue)
         setIsInitialized(true)
         
-        console.log('📊 Initial data loaded successfully:', {
-          cashFlow: cashFlow.length,
-          profit: profit.length,
-          expenses: expenses.length,
-          revenue: revenue.length,
-          timeRange
-        })
+        // console.log('📊 Initial data loaded successfully:', { cashFlow: cashFlow.length, profit: profit.length, expenses: expenses.length, revenue: revenue.length, timeRange })
       }).catch(error => {
         console.error('Error loading initial data:', error)
       }).finally(() => {

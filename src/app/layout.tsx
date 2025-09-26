@@ -29,6 +29,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning={true} // Suppress hydration warnings from browser extensions (Grammarly, etc.)
       >
         {/* Data Provider - Load once, share across all pages */}
         <DataProvider>
