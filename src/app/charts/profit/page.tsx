@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -6,9 +8,12 @@ import { DeltaDisplay } from '@/components/charts/DeltaDisplay'
 import { TransactionBreakdown } from '@/components/charts/TransactionBreakdown'
 import { MobileHeader } from '@/components/MobileHeader'
 import { ResponsiveWrapper } from '@/components/ResponsiveWrapper'
+import { useResponsiveView } from '@/hooks/useResponsiveView'
 import { ChartType } from '@/lib/types'
 
 const ProfitContent = () => {
+  const { isMobileView } = useResponsiveView()
+  
   return (
     <div className="min-h-screen">
       {/* Mobile Header */}
@@ -18,8 +23,8 @@ const ProfitContent = () => {
         backHref="/dashboard"
       />
       
-      {/* Desktop Header */}
-      <div className="hidden md:block">
+      {/* Desktop Header - Only show when not in mobile view */}
+      {!isMobileView && (
         <div className="container mx-auto p-6">
           <div className="mb-6">
             <Link href="/dashboard">
@@ -32,7 +37,7 @@ const ProfitContent = () => {
             <p className="text-gray-600 mt-2">Detailed profit visualization and breakdown with real-time delta comparisons</p>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Content Layout - Mobile Optimized */}
       <ResponsiveWrapper
