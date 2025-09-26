@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown } from 'lucide-react'
 import { ChartType } from '@/lib/types'
-import { useChartData } from '@/hooks/useChartData'
+import { useChartDataConsumer } from '@/hooks/useChartDataConsumer'
 import { useDeltaComparison } from '@/hooks/useDeltaComparison'
 import { useAtom } from 'jotai'
 import { isLoadingAtom } from '@/lib/atoms'
@@ -17,9 +17,8 @@ interface DashboardCardProps {
 }
 
 export const DashboardCard = ({ type, title, href }: DashboardCardProps) => {
-  const { cashFlowData, profitData, expensesData, revenueData } = useChartData()
+  const { cashFlowData, profitData, expensesData, revenueData, isLoading } = useChartDataConsumer()
   const { getCurrentDeltas } = useDeltaComparison()
-  const [isLoading] = useAtom(isLoadingAtom)
   
   const deltas = getCurrentDeltas()
   

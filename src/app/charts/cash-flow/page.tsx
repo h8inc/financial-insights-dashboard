@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { DataProvider } from '@/components/DataProvider'
 import { ChartVisualization } from '@/components/charts/ChartVisualization'
 import { DeltaDisplay } from '@/components/charts/DeltaDisplay'
 import { TransactionBreakdown } from '@/components/charts/TransactionBreakdown'
@@ -93,9 +92,5 @@ const CashFlowContent = () => {
 }
 
 export default function CashFlowPage() {
-  return (
-    <DataProvider>
-      <CashFlowContent />
-    </DataProvider>
-  )
+  return <CashFlowContent />
 }

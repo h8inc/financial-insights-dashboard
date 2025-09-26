@@ -3,14 +3,13 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { ChartType } from '@/lib/types'
-import { useChartData } from '@/hooks/useChartData'
+import { useChartDataConsumer } from '@/hooks/useChartDataConsumer'
 import { useDeltaComparison } from '@/hooks/useDeltaComparison'
-import { useAtom } from 'jotai'
-import { isLoadingAtom, cashFlowModeAtom } from '@/lib/atoms'
 import { MobileChartModeSwitcher } from './MobileChartModeSwitcher'
 import { MobileTimeFilter } from './MobileTimeFilter'
 import { useResponsiveView } from '@/hooks/useResponsiveView'
 import { D3BarChart, D3LineChart } from './D3Charts'
+import { useMemo } from 'react'
 
 interface MobileChartLayoutProps {
   type: ChartType
@@ -18,10 +17,8 @@ interface MobileChartLayoutProps {
 }
 
 export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
-  const { cashFlowData, profitData, expensesData, revenueData } = useChartData()
+  const { cashFlowData, profitData, expensesData, revenueData, isLoading, cashFlowMode } = useChartDataConsumer()
   const { getCurrentDeltas } = useDeltaComparison()
-  const [isLoading] = useAtom(isLoadingAtom)
-  const [cashFlowMode] = useAtom(cashFlowModeAtom)
   const { isMobileView } = useResponsiveView()
   
   const deltas = getCurrentDeltas()
@@ -75,8 +72,8 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
   const currentDelta = getCurrentDelta()
   
   // Render D3 chart based on type and mode for mobile
-  const renderMobileD3Chart = () => {
-    if (currentData.length === 0) return null
+  const renderMobileD3Chart = useMemo(() => {
+    if (!currentData || currentData.length === 0) return null
 
     const chartProps = {
       width: 400,
@@ -118,7 +115,7 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
       default:
         return null
     }
-  }
+  }, [type, currentData, cashFlowData, profitData, expensesData, revenueData])
 
   // Only render on mobile
   if (!isMobileView) {
@@ -188,8 +185,8 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
           
           {/* 3c. Chart Visualization - BELOW LEGEND */}
           <div className="bg-gray-50 rounded-lg p-2">
-            {currentData.length > 0 ? (
-              renderMobileD3Chart()
+            {currentData && currentData.length > 0 ? (
+              renderMobileD3Chart
             ) : (
               <div className="flex items-center justify-center h-48">
                 <p className="text-gray-500">No data available</p>

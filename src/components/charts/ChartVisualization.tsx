@@ -4,26 +4,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown } from 'lucide-react'
 import { ChartType, ChartDataPoint, CashFlowDataPoint } from '@/lib/types'
-import { useChartData } from '@/hooks/useChartData'
+import { useChartDataConsumer } from '@/hooks/useChartDataConsumer'
 import { useDeltaComparison } from '@/hooks/useDeltaComparison'
-import { useAtom } from 'jotai'
-import { isLoadingAtom, cashFlowModeAtom } from '@/lib/atoms'
 import { EmbeddedChartFilters } from './EmbeddedChartFilters'
 import { MobileChartLayout } from './MobileChartLayout'
 import { useResponsiveView } from '@/hooks/useResponsiveView'
 import { D3BarChart, D3LineChart } from './D3Charts'
-import { useState } from 'react'
+import { useMemo, useState, memo } from 'react'
 
 interface ChartVisualizationProps {
   type: ChartType
   title: string
 }
 
-export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => {
-  const { cashFlowData, profitData, expensesData, revenueData } = useChartData()
+const ChartVisualizationComponent = ({ type, title }: ChartVisualizationProps) => {
+  const { cashFlowData, profitData, expensesData, revenueData, isLoading, cashFlowMode } = useChartDataConsumer()
   const { getCurrentDeltas } = useDeltaComparison()
-  const [isLoading] = useAtom(isLoadingAtom)
-  const [cashFlowMode] = useAtom(cashFlowModeAtom)
   const { isMobileView } = useResponsiveView()
   const [hoveredPoint, setHoveredPoint] = useState<ChartDataPoint | CashFlowDataPoint | null>(null)
   
@@ -37,16 +33,12 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
         if (cashFlowMode === 'balance') {
           // Return balance data as ChartDataPoint format
           return cashFlowData.map(point => ({
-            date: point.date,
+            ...point,
             value: point.balance
           }))
-        } else {
-          // Return net flow data (activity mode)
-          return cashFlowData.map(point => ({
-            date: point.date,
-            value: point.value
-          }))
         }
+        // In activity mode, return the original cash flow data
+        return cashFlowData
       case ChartType.PROFIT:
         return profitData
       case ChartType.EXPENSES:
@@ -74,17 +66,15 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
     }
   }
   
-  const currentData = getCurrentData()
-  const currentDelta = getCurrentDelta()
+  const currentData = useMemo(() => getCurrentData(), [cashFlowData, profitData, expensesData, revenueData, cashFlowMode, type])
+  const currentDelta = useMemo(() => getCurrentDelta(), [deltas, type])
   
   // Calculate current value (sum of all data points)
-  const currentValue = currentData.reduce((sum, point) => sum + point.value, 0)
+  const currentValue = useMemo(() => {
+    if (!currentData || currentData.length === 0) return 0
+    return currentData.reduce((sum, point) => sum + point.value, 0)
+  }, [currentData])
 
-  // Render mobile layout if on mobile
-  if (isMobileView) {
-    return <MobileChartLayout type={type} title={title} />
-  }
-  
   // Format value as currency
   const formatValue = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -96,8 +86,8 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
   }
   
   // Render D3 chart based on type and mode
-  const renderD3Chart = () => {
-    if (currentData.length === 0) return null
+  const renderD3Chart = useMemo(() => {
+    if (!currentData || currentData.length === 0) return null
 
     const chartProps = {
       width: 800,
@@ -107,11 +97,15 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
     }
 
     switch (type) {
-      case ChartType.CASH_FLOW:
-        // Temporarily use bar chart for cash flow until D3CashFlowChart is fixed
+      case ChartType.CASH_FLOW: {
+        const chartData = cashFlowMode === 'balance'
+          ? cashFlowData.map(point => ({ ...point, value: point.balance }))
+          : cashFlowData
+
         return (
-          <D3BarChart {...chartProps} data={cashFlowData} color="#3b82f6" />
+          <D3BarChart {...chartProps} data={chartData} color="#3b82f6" />
         )
+      }
       case ChartType.PROFIT:
         return (
           <D3BarChart
@@ -140,6 +134,11 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
       default:
         return null
     }
+  }, [type, cashFlowMode, cashFlowData, profitData, expensesData, revenueData, currentData, setHoveredPoint])
+
+  // Render mobile layout if on mobile
+  if (isMobileView) {
+    return <MobileChartLayout type={type} title={title} />
   }
   
   if (isLoading) {
@@ -210,8 +209,8 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
       </CardHeader>
       <CardContent>
         <div className="h-96 bg-gray-50 rounded-lg p-4">
-          {currentData.length > 0 ? (
-            renderD3Chart()
+          {currentData && currentData.length > 0 ? (
+            renderD3Chart
           ) : (
             <div className="flex items-center justify-center h-full">
               <p className="text-gray-500">No data available</p>
@@ -219,8 +218,8 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
           )}
         </div>
         <div className="mt-4 text-sm text-gray-600">
-          <p>Showing {currentData.length} data points</p>
-          <p>Period: {currentData[0]?.date} to {currentData[currentData.length - 1]?.date}</p>
+          <p>Showing {currentData?.length || 0} data points</p>
+          <p>Period: {currentData?.[0]?.date || 'N/A'} to {currentData?.[currentData.length - 1]?.date || 'N/A'}</p>
           {hoveredPoint && (
             <div className="mt-2 p-2 bg-blue-50 rounded border-l-4 border-blue-400">
               <p className="text-blue-800 font-medium">
@@ -236,4 +235,7 @@ export const ChartVisualization = ({ type, title }: ChartVisualizationProps) => 
     </Card>
   )
 }
+
+// Memoize the component to prevent unnecessary re-renders
+export const ChartVisualization = memo(ChartVisualizationComponent)
 

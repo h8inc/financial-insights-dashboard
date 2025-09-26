@@ -28,7 +28,7 @@ export const useDeltaComparison = () => {
     return calculateDelta(currentSum, previousSum)
   }
 
-  // Update deltas from period data returned by useChartData
+  // Update deltas from period data returned by useEnhancedChartData
   const updateDeltasFromPeriodData = (periodData: {
     cashFlow: { current: ChartDataPoint[]; previous: ChartDataPoint[] }
     profit: { current: ChartDataPoint[]; previous: ChartDataPoint[] }

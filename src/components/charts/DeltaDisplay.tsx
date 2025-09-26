@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown, RefreshCw } from 'lucide-react'
 import { ChartType } from '@/lib/types'
-import { useChartData } from '@/hooks/useChartData'
+import { useChartDataConsumer } from '@/hooks/useChartDataConsumer'
 import { useDeltaComparison } from '@/hooks/useDeltaComparison'
 import { useDataContext } from '@/components/DataProvider'
 import { Button } from '@/components/ui/button'
@@ -14,7 +14,7 @@ interface DeltaDisplayProps {
 }
 
 export const DeltaDisplay = ({ type }: DeltaDisplayProps) => {
-  const { cashFlowData, profitData, expensesData, revenueData } = useChartData()
+  const { cashFlowData, profitData, expensesData, revenueData } = useChartDataConsumer()
   const { getCurrentDeltas } = useDeltaComparison()
   const { refreshData, isLoading } = useDataContext()
   

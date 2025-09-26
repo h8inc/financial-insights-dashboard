@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ChartType, Transaction } from '@/lib/types'
-import { useChartData } from '@/hooks/useChartData'
+import { useChartDataConsumer } from '@/hooks/useChartDataConsumer'
 import { useAtom } from 'jotai'
 import { isLoadingAtom } from '@/lib/atoms'
 
@@ -12,26 +12,41 @@ interface TransactionBreakdownProps {
 }
 
 export const TransactionBreakdown = ({ type }: TransactionBreakdownProps) => {
-  const { } = useChartData()
-  const [isLoading] = useAtom(isLoadingAtom)
+  const { isLoading } = useChartDataConsumer()
   
-  // Generate mock transaction data based on chart type
+  // Seeded random function for deterministic results
+  const seededRandom = (seed: number) => {
+    const x = Math.sin(seed) * 10000
+    return x - Math.floor(x)
+  }
+  
+  // Generate mock transaction data based on chart type (deterministic)
   const generateMockTransactions = (): Transaction[] => {
     const transactions: Transaction[] = []
     const categories = getCategoriesForType(type)
     const baseAmount = getBaseAmountForType(type)
     
-    // Generate 10-15 mock transactions
-    const numTransactions = Math.floor(Math.random() * 6) + 10
+    // Use chart type as seed for consistent results
+    const seed = type === ChartType.CASH_FLOW ? 1 : 
+                 type === ChartType.PROFIT ? 2 : 
+                 type === ChartType.EXPENSES ? 3 : 4
+    
+    // Generate fixed number of transactions based on type
+    const numTransactions = 12 + (seed * 2) // 14, 16, 18, 20 transactions
     
     for (let i = 0; i < numTransactions; i++) {
-      const category = categories[Math.floor(Math.random() * categories.length)]
-      const amount = Math.floor(Math.random() * baseAmount * 0.3) + baseAmount * 0.1
+      const categoryIndex = Math.floor(seededRandom(seed * 100 + i) * categories.length)
+      const category = categories[categoryIndex]
+      
+      const amountVariation = seededRandom(seed * 200 + i) * 0.3 + 0.1
+      const amount = Math.floor(baseAmount * amountVariation)
+      
       const date = new Date()
-      date.setDate(date.getDate() - Math.floor(Math.random() * 30))
+      const daysBack = Math.floor(seededRandom(seed * 300 + i) * 30)
+      date.setDate(date.getDate() - daysBack)
       
       transactions.push({
-        id: `txn-${i + 1}`,
+        id: `txn-${type}-${i + 1}`,
         date: date.toISOString().split('T')[0],
         amount: amount,
         description: generateDescription(category, type),

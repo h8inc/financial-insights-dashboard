@@ -1,10 +1,7 @@
 'use client'
 
-import { useEffect, useState, createContext, useContext, useCallback } from 'react'
-import { useChartData } from '@/hooks/useChartData'
-import { useDeltaComparison } from '@/hooks/useDeltaComparison'
-import { useAtom } from 'jotai'
-import { isLoadingAtom } from '@/lib/atoms'
+import { createContext, useContext } from 'react'
+import { useEnhancedChartData } from '@/hooks/useEnhancedChartData'
 
 interface DataProviderProps {
   children: React.ReactNode
@@ -13,6 +10,7 @@ interface DataProviderProps {
 interface DataContextType {
   refreshData: () => Promise<void>
   isLoading: boolean
+  clearCache: () => { success: boolean; error?: string }
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined)
@@ -26,36 +24,16 @@ export const useDataContext = () => {
 }
 
 export const DataProvider = ({ children }: DataProviderProps) => {
-  const { loadChartData } = useChartData()
-  const { updateDeltasFromPeriodData } = useDeltaComparison()
-  const [isLoading, setIsLoading] = useAtom(isLoadingAtom)
-  const [isInitialized, setIsInitialized] = useState(false)
-
-  const refreshData = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      // Load chart data and get period data for delta calculation
-      const periodData = await loadChartData()
-      
-      // Update deltas based on the loaded data
-      updateDeltasFromPeriodData(periodData)
-      
-      setIsInitialized(true)
-    } catch (error) {
-      console.error('Failed to refresh data:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [loadChartData, updateDeltasFromPeriodData, setIsLoading])
-
-  useEffect(() => {
-    if (!isInitialized) {
-      refreshData()
-    }
-  }, [isInitialized, refreshData])
+  // This is the ONLY place where useEnhancedChartData should be called
+  // It handles ALL data loading for the entire app
+  const { refreshData, clearCache, isLoading } = useEnhancedChartData()
 
   return (
-    <DataContext.Provider value={{ refreshData, isLoading }}>
+    <DataContext.Provider value={{ 
+      refreshData, 
+      isLoading, 
+      clearCache 
+    }}>
       {children}
     </DataContext.Provider>
   )

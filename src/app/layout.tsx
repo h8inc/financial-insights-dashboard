@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ResponsiveContainer } from "@/components/ResponsiveContainer";
 import { ViewSwitcher } from "@/components/ViewSwitcher";
+import { DataProvider } from "@/components/DataProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,20 +30,23 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* Dedicated Header Area */}
-        <header className="w-full bg-white border-b border-gray-200 py-4">
-          <div className="flex justify-center">
-            <ViewSwitcher 
-              variant="dropdown" 
-              className="shadow-sm" 
-            />
-          </div>
-        </header>
-        
-        {/* Main Content */}
-        <ResponsiveContainer>
-          {children}
-        </ResponsiveContainer>
+        {/* Data Provider - Load once, share across all pages */}
+        <DataProvider>
+          {/* Dedicated Header Area */}
+          <header className="w-full bg-white border-b border-gray-200 py-4">
+            <div className="flex justify-center">
+              <ViewSwitcher 
+                variant="dropdown" 
+                className="shadow-sm" 
+              />
+            </div>
+          </header>
+          
+          {/* Main Content */}
+          <ResponsiveContainer>
+            {children}
+          </ResponsiveContainer>
+        </DataProvider>
       </body>
     </html>
   );

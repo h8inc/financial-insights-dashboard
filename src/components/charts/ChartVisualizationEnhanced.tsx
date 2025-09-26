@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown, Settings } from 'lucide-react'
 import { ChartType, ChartDataPoint, CashFlowDataPoint } from '@/lib/types'
-import { useChartData } from '@/hooks/useChartData'
+import { useChartDataConsumer } from '@/hooks/useChartDataConsumer'
 import { useDeltaComparison } from '@/hooks/useDeltaComparison'
 import { useAtom } from 'jotai'
 import { isLoadingAtom, cashFlowModeAtom } from '@/lib/atoms'
@@ -23,10 +23,8 @@ interface ChartVisualizationProps {
 }
 
 export const ChartVisualization = ({ type, title, enableAdvancedMode = false }: ChartVisualizationProps) => {
-  const { cashFlowData, profitData, expensesData, revenueData } = useChartData()
+  const { cashFlowData, profitData, expensesData, revenueData, isLoading, cashFlowMode } = useChartDataConsumer()
   const { getCurrentDeltas } = useDeltaComparison()
-  const [isLoading] = useAtom(isLoadingAtom)
-  const [cashFlowMode] = useAtom(cashFlowModeAtom)
   const { isMobileView } = useResponsiveView()
   const [hoveredPoint, setHoveredPoint] = useState<ChartDataPoint | CashFlowDataPoint | null>(null)
   const [showAdvancedMode, setShowAdvancedMode] = useState(false)
