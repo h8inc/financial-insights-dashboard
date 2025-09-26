@@ -9,14 +9,7 @@ export const useFilters = () => {
 
   const updateTimeRange = (range: TimeRange) => {
     setTimeRange(range)
-    if (range !== 'custom') {
-      setCustomDateRange(null)
-    }
-  }
-
-  const updateCustomDateRange = (range: DateRange) => {
-    setCustomDateRange(range)
-    setTimeRange('custom')
+    setCustomDateRange(null)
   }
 
   const toggleCashFlowMode = () => {
@@ -24,8 +17,6 @@ export const useFilters = () => {
   }
 
   const getDateRange = (): DateRange => {
-    if (customDateRange) return customDateRange
-
     const end = new Date()
     const start = new Date()
 
@@ -54,7 +45,6 @@ export const useFilters = () => {
     customDateRange,
     cashFlowMode,
     updateTimeRange,
-    updateCustomDateRange,
     toggleCashFlowMode,
     getDateRange
   }

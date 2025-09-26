@@ -23,11 +23,11 @@ export function MobileSubscriptionSheet({ children }: MobileSubscriptionSheetPro
     activeSubscription,
     permissions,
     setSpecificSubscriptionMode,
-    deviceType
+    isMobileView
   } = useResponsiveView()
 
-  // Only show on mobile
-  if (deviceType !== 'mobile') {
+  // Only show sheet functionality when mobile view is active (respects view switcher)
+  if (!isMobileView) {
     return <>{children}</>
   }
 

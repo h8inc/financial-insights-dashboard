@@ -60,10 +60,16 @@ export const D3BaseChart = React.forwardRef<SVGSVGElement, D3BaseChartProps>(({
       .nice()
       .range([innerHeight, 0])
 
-    // Create axes
+    // Create axes with responsive formatting
     const xAxis = d3.axisBottom(xScale)
-      .tickFormat((d) => d3.timeFormat('%b %d')(d as Date))
-      .ticks(Math.min(data.length, 8))
+      .tickFormat((d) => {
+        // Use shorter format for mobile/smaller charts
+        if (width < 500) {
+          return d3.timeFormat('%b')(d as Date) // Just "Jan", "Feb", etc.
+        }
+        return d3.timeFormat('%b %d')(d as Date) // "Jan 01" for desktop
+      })
+      .ticks(Math.min(data.length, width < 500 ? 6 : 8))
 
     const yAxis = d3.axisLeft(yScale)
       .tickFormat(d => `$${d3.format('.0s')(d as number)}`)

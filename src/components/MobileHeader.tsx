@@ -21,10 +21,10 @@ export function MobileHeader({
   backHref = '/dashboard',
   showSubscriptionControl = true 
 }: MobileHeaderProps) {
-  const { activeSubscription, deviceType } = useResponsiveView()
+  const { activeSubscription, isMobileView } = useResponsiveView()
 
-  // Only render on mobile
-  if (deviceType !== 'mobile') {
+  // Only render when mobile view is active (respects view switcher)
+  if (!isMobileView) {
     return null
   }
 

@@ -33,7 +33,7 @@ const chartCards = [
 ]
 
 export const DashboardContent = () => {
-  const { activeSubscription, deviceType, activeView } = useResponsiveView()
+  const { activeSubscription, isMobileView } = useResponsiveView()
 
   return (
     <ResponsiveWrapper
@@ -61,8 +61,8 @@ export const DashboardContent = () => {
             </ResponsiveWrapper>
           </div>
           
-          {/* Mobile Subscription Control - Show when activeView is mobile OR deviceType is mobile */}
-          {(activeView === 'mobile' || deviceType === 'mobile') && (
+          {/* Mobile Subscription Control - Show when mobile view is active (respects view switcher) */}
+          {isMobileView && (
             <div className="ml-4">
               <MobileSubscriptionSheet>
                 <div className="flex items-center gap-2">

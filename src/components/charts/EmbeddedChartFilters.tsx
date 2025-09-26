@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button'
 import { useFilters } from '@/hooks/useFilters'
 import { useResponsiveView } from '@/hooks/useResponsiveView'
 import { ChartType } from '@/lib/types'
-import { Calendar } from 'lucide-react'
 
 interface EmbeddedChartFiltersProps {
   chartType: ChartType
@@ -26,8 +25,7 @@ export const EmbeddedChartFilters = ({ chartType, className = '' }: EmbeddedChar
     { value: '7D', label: 'Last 7 Days', short: '7D' },
     { value: '30D', label: 'Last 30 Days', short: '30D' },
     { value: '3M', label: 'Last 3 Months', short: '3M' },
-    { value: 'YTD', label: 'Year to Date', short: 'YTD' },
-    { value: 'custom', label: 'Custom Range', short: 'Custom' }
+    { value: 'YTD', label: 'Year to Date', short: 'YTD' }
   ]
 
   // Desktop: Show both time range and chart mode filters side by side
@@ -37,7 +35,7 @@ export const EmbeddedChartFilters = ({ chartType, className = '' }: EmbeddedChar
         {/* Time Range Filters */}
         <div className="flex items-center gap-2">
           <div className="flex gap-1">
-            {timeRanges.slice(0, -1).map((range) => (
+            {timeRanges.map((range) => (
               <Button
                 key={range.value}
                 variant={timeRange === range.value ? 'default' : 'outline'}
@@ -49,16 +47,6 @@ export const EmbeddedChartFilters = ({ chartType, className = '' }: EmbeddedChar
               </Button>
             ))}
           </div>
-          
-          <Button
-            variant={timeRange === 'custom' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => updateTimeRange('custom')}
-            className="text-xs px-3 py-1 h-7 flex items-center gap-1"
-          >
-            <Calendar className="h-3 w-3" />
-            Custom
-          </Button>
         </div>
 
         {/* Chart Mode Switcher (only for cash flow) */}

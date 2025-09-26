@@ -32,7 +32,7 @@ export interface CashFlowChartProps extends ChartProps {
 }
 
 // Filter types
-export type TimeRange = '7D' | '30D' | '3M' | 'YTD' | 'custom'
+export type TimeRange = '7D' | '30D' | '3M' | 'YTD'
 
 export interface DateRange {
   start: Date
