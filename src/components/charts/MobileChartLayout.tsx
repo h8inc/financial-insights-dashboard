@@ -83,15 +83,16 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
 
     switch (type) {
       case ChartType.CASH_FLOW:
-        // Temporarily use bar chart for cash flow until D3CashFlowChart is fixed
+        // Use the transformed currentData instead of raw cashFlowData
+        // This ensures Activity/Balance mode switching works correctly
         return (
-          <D3BarChart {...chartProps} data={cashFlowData} color="#3b82f6" />
+          <D3BarChart {...chartProps} data={currentData} color="#3b82f6" />
         )
       case ChartType.PROFIT:
         return (
           <D3BarChart
             {...chartProps}
-            data={profitData}
+            data={currentData}
             color="#10b981"
           />
         )
@@ -99,7 +100,7 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
         return (
           <D3BarChart
             {...chartProps}
-            data={expensesData}
+            data={currentData}
             color="#ef4444"
           />
         )
@@ -107,7 +108,7 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
         return (
           <D3LineChart
             {...chartProps}
-            data={revenueData}
+            data={currentData}
             color="#3b82f6"
             showArea={true}
           />
@@ -115,7 +116,7 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
       default:
         return null
     }
-  }, [type, currentData, cashFlowData, profitData, expensesData, revenueData])
+  }, [type, currentData])
 
   // Only render on mobile
   if (!isMobileView) {
