@@ -3,11 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChartType } from '@/lib/types'
 import { DashboardCard } from '@/components/DashboardCard'
-import { MobileSubscriptionSheet } from '@/components/MobileSubscriptionSheet'
 import { ResponsiveWrapper } from '@/components/ResponsiveWrapper'
-import { Badge } from '@/components/ui/badge'
-import { Crown, Lock } from 'lucide-react'
-import { useResponsiveView } from '@/hooks/useResponsiveView'
+import { UnifiedHeader } from '@/components/UnifiedHeader'
 
 const chartCards = [
   {
@@ -33,58 +30,27 @@ const chartCards = [
 ]
 
 export const DashboardContent = () => {
-  const { activeSubscription, isMobileView } = useResponsiveView()
-
   return (
-    <ResponsiveWrapper
-      className="container mx-auto"
-      mobileClassName="p-4"
-      desktopClassName="p-4 md:p-6"
-    >
+    <div className="min-h-screen">
+      {/* Unified Header */}
+      <UnifiedHeader 
+        title="Financial Dashboard"
+        description="Overview of your financial metrics with real-time delta comparisons"
+        showBackButton={false}
+      />
+      
+      {/* Main Content */}
       <ResponsiveWrapper
-        mobileClassName="mb-6"
-        desktopClassName="mb-6 md:mb-8"
+        className="container mx-auto"
+        mobileClassName="p-4"
+        desktopClassName="p-4 md:p-6"
       >
-        <div className="flex justify-between items-center">
-          <div className="flex-1">
-            <ResponsiveWrapper
-              mobileClassName="text-2xl font-bold text-gray-900"
-              desktopClassName="text-2xl md:text-3xl font-bold text-gray-900"
-            >
-              <h1>Financial Dashboard</h1>
-            </ResponsiveWrapper>
-            <ResponsiveWrapper
-              mobileClassName="text-sm text-gray-600 mt-1"
-              desktopClassName="text-sm md:text-base text-gray-600 mt-1 md:mt-2"
-            >
-              <p>Overview of your financial metrics with real-time delta comparisons</p>
-            </ResponsiveWrapper>
-          </div>
-          
-          {/* Mobile Subscription Control - Show when mobile view is active (respects view switcher) */}
-          {isMobileView && (
-            <div className="ml-4">
-              <MobileSubscriptionSheet>
-                <div className="flex items-center gap-2">
-                  {activeSubscription === 'paid' ? (
-                    <Crown className="h-4 w-4 text-yellow-500" />
-                  ) : (
-                    <Lock className="h-4 w-4 text-gray-500" />
-                  )}
-                  <Badge 
-                    variant={activeSubscription === 'paid' ? 'default' : 'secondary'}
-                    className="text-xs"
-                  >
-                    {activeSubscription === 'paid' ? 'Pro' : 'Free'}
-                  </Badge>
-                </div>
-              </MobileSubscriptionSheet>
-            </div>
-          )}
-          
-          {/* ViewSwitcher handled at root layout level for desktop */}
-        </div>
-      </ResponsiveWrapper>
+        <ResponsiveWrapper
+          mobileClassName="mb-6"
+          desktopClassName="mb-6 md:mb-8"
+        >
+          {/* Empty space for consistent spacing */}
+        </ResponsiveWrapper>
 
       <ResponsiveWrapper
         mobileClassName="grid grid-cols-1 gap-4"
@@ -117,6 +83,7 @@ export const DashboardContent = () => {
         </Card>
       </ResponsiveWrapper>
     </ResponsiveWrapper>
+    </div>
   )
 }
 

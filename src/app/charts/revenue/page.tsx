@@ -1,43 +1,21 @@
 'use client'
 
-import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { ChartVisualization } from '@/components/charts/ChartVisualization'
 import { DeltaDisplay } from '@/components/charts/DeltaDisplay'
 import { TransactionBreakdown } from '@/components/charts/TransactionBreakdown'
-import { MobileHeader } from '@/components/MobileHeader'
 import { ResponsiveWrapper } from '@/components/ResponsiveWrapper'
-import { useResponsiveView } from '@/hooks/useResponsiveView'
+import { UnifiedHeader } from '@/components/UnifiedHeader'
 import { ChartType } from '@/lib/types'
 
 const RevenueContent = () => {
-  const { isMobileView } = useResponsiveView()
-  
   return (
     <div className="min-h-screen">
-      {/* Mobile Header */}
-      <MobileHeader 
+      {/* Unified Header */}
+      <UnifiedHeader 
         title="Revenue Analysis"
         description="Detailed revenue visualization and breakdown with real-time delta comparisons"
         backHref="/dashboard"
       />
-      
-      {/* Desktop Header - Only show when not in mobile view */}
-      {!isMobileView && (
-        <div className="container mx-auto p-6">
-          <div className="mb-6">
-            <Link href="/dashboard">
-              <Button variant="outline" className="mb-4">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
-              </Button>
-            </Link>
-            <h1 className="text-3xl font-bold text-gray-900">Revenue Analysis</h1>
-            <p className="text-gray-600 mt-2">Detailed revenue visualization and breakdown with real-time delta comparisons</p>
-          </div>
-        </div>
-      )}
 
       {/* Content Layout - Mobile Optimized */}
       <ResponsiveWrapper

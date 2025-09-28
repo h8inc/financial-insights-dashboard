@@ -4,6 +4,7 @@ import "./globals.css";
 import { ResponsiveContainer } from "@/components/ResponsiveContainer";
 import { ViewSwitcher } from "@/components/ViewSwitcher";
 import { DataProvider } from "@/components/DataProvider";
+import { DesktopControlBar } from "@/components/DesktopControlBar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,15 +34,8 @@ export default function RootLayout({
       >
         {/* Data Provider - Load once, share across all pages */}
         <DataProvider>
-          {/* Dedicated Header Area */}
-          <header className="w-full bg-white border-b border-gray-200 py-4">
-            <div className="flex justify-center">
-              <ViewSwitcher 
-                variant="dropdown" 
-                className="shadow-sm" 
-              />
-            </div>
-          </header>
+          {/* Desktop Control Bar - Outside mobile frame */}
+          <DesktopControlBar />
           
           {/* Main Content */}
           <ResponsiveContainer>
