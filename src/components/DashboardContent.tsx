@@ -49,7 +49,7 @@ export const DashboardContent = () => {
           mobileClassName="mb-6"
           desktopClassName="mb-6 md:mb-8"
         >
-          {/* Empty space for consistent spacing */}
+          <div>{/* Empty space for consistent spacing */}</div>
         </ResponsiveWrapper>
 
       <ResponsiveWrapper
