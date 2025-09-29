@@ -28,9 +28,9 @@ class MockDataGenerator {
     for (let i = 0; i < count; i++) {
       const date = this.generateDateForPeriod(i, count, period)
       
-      // Generate inflow and outflow with some randomness
-      const baseInflow = 8000 + Math.random() * 4000
-      const baseOutflow = 6000 + Math.random() * 3000
+      // Generate inflow and outflow with static patterns
+      const baseInflow = 8000 + (i % 3) * 1000 + (i % 7) * 200
+      const baseOutflow = 6000 + (i % 4) * 800 + (i % 5) * 150
       
       // Adjust amounts based on period
       const periodMultiplier = period === 'weekly' ? 7 : period === 'monthly' ? 30 : 1
@@ -83,12 +83,12 @@ class MockDataGenerator {
       // Monthly trend (higher values mid-month)
       const monthlyTrend = Math.sin((dayOfMonth / 30) * Math.PI) * 0.1 + 1
       
-      // Random variation
-      const randomFactor = 1 + (Math.random() - 0.5) * volatility
+      // Static variation based on index
+      const staticFactor = 1 + (Math.sin(i * 0.3) * 0.1) + (Math.cos(i * 0.7) * 0.05)
       
       // Adjust base value based on period
       const periodMultiplier = period === 'weekly' ? 7 : period === 'monthly' ? 30 : 1
-      const value = base * weekendFactor * monthlyTrend * randomFactor * periodMultiplier
+      const value = base * weekendFactor * monthlyTrend * staticFactor * periodMultiplier
       
       const dataPoint = {
         date: date.toISOString().split('T')[0],
@@ -164,8 +164,8 @@ export class MockApiService {
       // Validate the request
       const validatedRequest = ChartDataRequestSchema.parse(request)
       
-      // Simulate API delay (reduced for better performance)
-      await this.simulateDelay(10 + Math.random() * 20)
+      // Simulate API delay (static for consistency)
+      await this.simulateDelay(15)
       
       // Generate data based on chart type
       let data: ChartDataPoint[]
@@ -214,8 +214,8 @@ export class MockApiService {
   // Get cash flow data specifically (returns CashFlowDataPoint[])
   static async getCashFlowData(timeRange: TimeRange): Promise<CashFlowResponse | ApiError> {
     try {
-      // Simulate API delay (reduced for better performance)
-      await this.simulateDelay(10 + Math.random() * 20)
+      // Simulate API delay (static for consistency)
+      await this.simulateDelay(15)
       
       // Generate cash flow data
       const data = MockDataGenerator.generateCashFlowData(timeRange)
