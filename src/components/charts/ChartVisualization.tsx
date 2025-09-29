@@ -98,13 +98,30 @@ const ChartVisualizationComponent = ({ type, title }: ChartVisualizationProps) =
 
     switch (type) {
       case ChartType.CASH_FLOW: {
-        const chartData = cashFlowMode === 'balance'
-          ? cashFlowData.map(point => ({ ...point, value: point.balance }))
-          : cashFlowData
-
-        return (
-          <D3BarChart {...chartProps} data={chartData} color="#3b82f6" />
-        )
+        if (cashFlowMode === 'balance') {
+          // Balance mode: Show line chart
+          const chartData = cashFlowData.map(point => ({ ...point, value: point.balance }))
+          return (
+            <D3LineChart {...chartProps} data={chartData} color="#3b82f6" showArea={true} />
+          )
+        } else {
+          // Activity mode: Show inflow and outflow as separate bars
+          // For now, we'll show net flow (inflow - outflow) with color based on positive/negative
+          const chartData = cashFlowData.map(point => ({
+            ...point,
+            value: Math.abs(point.value), // Use absolute value for bar height
+            isPositive: point.value >= 0,
+            originalValue: point.value // Keep original value for tooltip
+          }))
+          
+          return (
+            <D3BarChart 
+              {...chartProps} 
+              data={chartData} 
+              color="#10b981" // Green for positive, will be overridden per bar
+            />
+          )
+        }
       }
       case ChartType.PROFIT:
         return (
@@ -208,7 +225,21 @@ const ChartVisualizationComponent = ({ type, title }: ChartVisualizationProps) =
         )}
       </CardHeader>
       <CardContent>
-        <div className="h-96 bg-gray-50 rounded-lg p-4">
+        <div 
+          className="h-96 bg-gray-50 rounded-lg p-4 relative"
+          onMouseLeave={() => {
+            setHoveredPoint(null)
+            // Also clear any hover backgrounds in D3
+            const svg = document.querySelector('.h-96 svg')
+            if (svg) {
+              const g = svg.querySelector('g')
+              if (g) {
+                const hoverBgs = g.querySelectorAll('.hover-background')
+                hoverBgs.forEach(bg => bg.remove())
+              }
+            }
+          }}
+        >
           {currentData && currentData.length > 0 ? (
             renderD3Chart
           ) : (
@@ -216,20 +247,33 @@ const ChartVisualizationComponent = ({ type, title }: ChartVisualizationProps) =
               <p className="text-gray-500">No data available</p>
             </div>
           )}
+          
+          {/* Tooltip positioned absolutely */}
+          {hoveredPoint && (
+            <div
+              className="absolute bg-gray-900 text-white px-3 py-2 rounded-lg shadow-lg text-sm pointer-events-none z-10"
+              style={{
+                left: `${((hoveredPoint as ChartDataPoint & { x?: number }).x || 0) + 10}px`,
+                top: `${((hoveredPoint as ChartDataPoint & { y?: number }).y || 0) - 10}px`,
+                transform: 'translate(0, -100%)'
+              }}
+            >
+              <div className="font-medium">
+                {new Date(hoveredPoint.date).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </div>
+              <div className="text-gray-300">
+                Value: ${((hoveredPoint as any).originalValue ?? hoveredPoint.value).toLocaleString()}
+              </div>
+            </div>
+          )}
         </div>
         <div className="mt-4 text-sm text-gray-600">
           <p>Showing {currentData?.length || 0} data points</p>
           <p>Period: {currentData?.[0]?.date || 'N/A'} to {currentData?.[currentData.length - 1]?.date || 'N/A'}</p>
-          {hoveredPoint && (
-            <div className="mt-2 p-2 bg-blue-50 rounded border-l-4 border-blue-400">
-              <p className="text-blue-800 font-medium">
-                Hovering: {new Date(hoveredPoint.date).toLocaleDateString()}
-              </p>
-              <p className="text-blue-600">
-                Value: ${hoveredPoint.value.toLocaleString()}
-              </p>
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>

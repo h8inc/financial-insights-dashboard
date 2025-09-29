@@ -9,7 +9,7 @@ import { MobileChartModeSwitcher } from './MobileChartModeSwitcher'
 import { MobileTimeFilter } from './MobileTimeFilter'
 import { useResponsiveView } from '@/hooks/useResponsiveView'
 import { D3BarChart, D3LineChart } from './D3Charts'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 interface MobileChartLayoutProps {
   type: ChartType
@@ -20,6 +20,7 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
   const { cashFlowData, profitData, expensesData, revenueData, isLoading, cashFlowMode } = useChartDataConsumer()
   const { getCurrentDeltas } = useDeltaComparison()
   const { isMobileView } = useResponsiveView()
+  const [hoveredPoint, setHoveredPoint] = useState<any>(null)
   
   const deltas = getCurrentDeltas()
   
@@ -79,15 +80,28 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
       width: 400,
       height: 200,
       className: "w-full h-full",
+      onDataPointHover: setHoveredPoint
     }
 
     switch (type) {
       case ChartType.CASH_FLOW:
-        // Use the transformed currentData instead of raw cashFlowData
-        // This ensures Activity/Balance mode switching works correctly
-        return (
-          <D3BarChart {...chartProps} data={currentData} color="#3b82f6" />
-        )
+        if (cashFlowMode === 'balance') {
+          // Balance mode: Show line chart
+          return (
+            <D3LineChart {...chartProps} data={currentData} color="#3b82f6" showArea={true} />
+          )
+        } else {
+          // Activity mode: Show bars with colors
+          const chartData = cashFlowData.map(point => ({
+            ...point,
+            value: Math.abs(point.value), // Use absolute value for bar height
+            isPositive: point.value >= 0,
+            originalValue: point.value // Keep original value for tooltip
+          }))
+          return (
+            <D3BarChart {...chartProps} data={chartData} color="#10b981" />
+          )
+        }
       case ChartType.PROFIT:
         return (
           <D3BarChart
@@ -183,6 +197,22 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
               </div>
             )}
           </div>
+          
+          {/* Mobile legend for tapped data point */}
+          {hoveredPoint && (
+            <div className="bg-gray-100 rounded-lg p-3 text-center">
+              <div className="text-sm font-medium text-gray-900">
+                {new Date(hoveredPoint.date).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </div>
+              <div className="text-lg font-bold text-blue-600">
+                ${((hoveredPoint as any).originalValue ?? hoveredPoint.value).toLocaleString()}
+              </div>
+            </div>
+          )}
           
           {/* 3c. Chart Visualization - BELOW LEGEND */}
           <div className="bg-gray-50 rounded-lg p-2">
