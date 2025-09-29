@@ -8,8 +8,6 @@ import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown, Settings } from
 import { ChartType, ChartDataPoint, CashFlowDataPoint } from '@/lib/types'
 import { useChartDataConsumer } from '@/hooks/useChartDataConsumer'
 import { useDeltaComparison } from '@/hooks/useDeltaComparison'
-import { useAtom } from 'jotai'
-import { isLoadingAtom, cashFlowModeAtom } from '@/lib/atoms'
 import { EmbeddedChartFilters } from './EmbeddedChartFilters'
 import { MobileChartLayout } from './MobileChartLayout'
 import { useResponsiveView } from '@/hooks/useResponsiveView'

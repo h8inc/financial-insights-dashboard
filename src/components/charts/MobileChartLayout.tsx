@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { TrendingUp, TrendingDown } from 'lucide-react'
-import { ChartType } from '@/lib/types'
+import { ChartType, ChartDataPoint } from '@/lib/types'
 import { useChartDataConsumer } from '@/hooks/useChartDataConsumer'
 import { useDeltaComparison } from '@/hooks/useDeltaComparison'
 import { MobileChartModeSwitcher } from './MobileChartModeSwitcher'
@@ -20,7 +20,7 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
   const { cashFlowData, profitData, expensesData, revenueData, isLoading, cashFlowMode } = useChartDataConsumer()
   const { getCurrentDeltas } = useDeltaComparison()
   const { isMobileView } = useResponsiveView()
-  const [hoveredPoint, setHoveredPoint] = useState<any>(null)
+  const [hoveredPoint, setHoveredPoint] = useState<ChartDataPoint | null>(null)
   
   const deltas = getCurrentDeltas()
   
@@ -130,7 +130,7 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
       default:
         return null
     }
-  }, [type, currentData])
+  }, [type, currentData, cashFlowData, cashFlowMode])
 
   // Only render on mobile
   if (!isMobileView) {
@@ -209,7 +209,7 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
                 })}
               </div>
               <div className="text-lg font-bold text-blue-600">
-                ${((hoveredPoint as any).originalValue ?? hoveredPoint.value).toLocaleString()}
+                ${((hoveredPoint as ChartDataPoint & { originalValue?: number }).originalValue ?? hoveredPoint.value).toLocaleString()}
               </div>
             </div>
           )}

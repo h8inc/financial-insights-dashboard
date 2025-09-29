@@ -66,8 +66,8 @@ const ChartVisualizationComponent = ({ type, title }: ChartVisualizationProps) =
     }
   }
   
-  const currentData = useMemo(() => getCurrentData(), [cashFlowData, profitData, expensesData, revenueData, cashFlowMode, type])
-  const currentDelta = useMemo(() => getCurrentDelta(), [deltas, type])
+  const currentData = useMemo(() => getCurrentData(), [getCurrentData, cashFlowData, profitData, expensesData, revenueData, cashFlowMode, type])
+  const currentDelta = useMemo(() => getCurrentDelta(), [getCurrentDelta, deltas, type])
   
   // Calculate current value (sum of all data points)
   const currentValue = useMemo(() => {
@@ -266,7 +266,7 @@ const ChartVisualizationComponent = ({ type, title }: ChartVisualizationProps) =
                 })}
               </div>
               <div className="text-gray-300">
-                Value: ${((hoveredPoint as any).originalValue ?? hoveredPoint.value).toLocaleString()}
+                Value: ${((hoveredPoint as ChartDataPoint & { originalValue?: number }).originalValue ?? hoveredPoint.value).toLocaleString()}
               </div>
             </div>
           )}

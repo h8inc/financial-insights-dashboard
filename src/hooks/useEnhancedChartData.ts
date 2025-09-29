@@ -16,7 +16,6 @@ import {
   CashFlowDataPointSchema,
   type ChartDataPoint,
   type CashFlowDataPoint,
-  type TimeRange 
 } from '@/lib/schemas'
 
 // ==========================================
@@ -211,7 +210,7 @@ export const useEnhancedChartData = () => {
         setIsLoading(false)
       })
     }
-  }, [isInitialized, isLoading]) // ONLY depend on these two states
+  }, [isInitialized, isLoading, fetchCashFlowData, fetchChartData, timeRange, cashFlowMode]) // Include all dependencies
 
   // Watch for time range changes and reload data (but only if already initialized)
   useEffect(() => {
@@ -219,7 +218,7 @@ export const useEnhancedChartData = () => {
       console.log('🔄 Time range or cash flow mode changed, reloading data...')
       refreshData()
     }
-  }, [timeRange, cashFlowMode]) // ONLY depend on the values that should trigger reload
+  }, [timeRange, cashFlowMode, isInitialized, refreshData]) // Include all dependencies
 
   // ==========================================
   // RETURN HOOK INTERFACE

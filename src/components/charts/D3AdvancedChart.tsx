@@ -83,7 +83,7 @@ export const D3AdvancedChart: React.FC<D3AdvancedChartProps> = ({
       })
 
     // Create brush
-    const brush = d3.brushX<SVGSVGElement>()
+    // const brush = d3.brushX<SVGSVGElement>() // Unused for now
       .extent([[0, innerHeight + 10], [innerWidth, innerHeight + 40]])
       .on('brush', (event) => {
         const selection = event.selection

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ResponsiveContainer } from "@/components/ResponsiveContainer";
-import { ViewSwitcher } from "@/components/ViewSwitcher";
 import { DataProvider } from "@/components/DataProvider";
 import { DesktopControlBar } from "@/components/DesktopControlBar";
 

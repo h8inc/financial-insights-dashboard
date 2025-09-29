@@ -22,7 +22,7 @@ export const D3BaseChart = React.forwardRef<SVGSVGElement, D3BaseChartProps>(({
   onDataPointHover
 }, ref) => {
   const svgRef = useRef<SVGSVGElement>(null)
-  const [hoveredPoint, setHoveredPoint] = useState<ChartDataPoint | CashFlowDataPoint | null>(null)
+  // const [hoveredPoint, setHoveredPoint] = useState<ChartDataPoint | CashFlowDataPoint | null>(null) // Unused for now
   
   // Use forwarded ref or internal ref
   const actualRef = ref || svgRef
@@ -138,34 +138,7 @@ export const D3BaseChart = React.forwardRef<SVGSVGElement, D3BaseChartProps>(({
         style={{ maxWidth: '100%', height: 'auto' }}
       />
       
-      {/* Tooltip */}
-      {hoveredPoint && (
-        <div
-          className="absolute bg-gray-900 text-white px-3 py-2 rounded-lg shadow-lg text-sm pointer-events-none z-10"
-          style={{
-            left: `${(hoveredPoint as ChartDataPoint & { x?: number }).x || 0}px`,
-            top: `${(hoveredPoint as ChartDataPoint & { y?: number }).y || 0}px`,
-            transform: 'translate(-50%, -100%)'
-          }}
-        >
-          <div className="font-semibold">
-            {new Date(hoveredPoint.date).toLocaleDateString()}
-          </div>
-          <div>
-            ${hoveredPoint.value.toLocaleString()}
-          </div>
-          {'inflow' in hoveredPoint && (
-            <>
-              <div className="text-green-400">
-                In: ${hoveredPoint.inflow.toLocaleString()}
-              </div>
-              <div className="text-red-400">
-                Out: ${hoveredPoint.outflow.toLocaleString()}
-              </div>
-            </>
-          )}
-        </div>
-      )}
+      {/* Tooltip handled at higher level */}
     </div>
   )
 })

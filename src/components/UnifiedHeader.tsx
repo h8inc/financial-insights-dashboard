@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { ArrowLeft, Crown, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ViewSwitcher } from '@/components/ViewSwitcher'
 import { MobileSubscriptionSheet } from '@/components/MobileSubscriptionSheet'
 import { useResponsiveView } from '@/hooks/useResponsiveView'
 

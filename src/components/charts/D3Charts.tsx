@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react'
 import * as d3 from 'd3'
 import { D3BaseChart, useD3Chart } from './D3BaseChart'
-import { ChartDataPoint, CashFlowDataPoint } from '@/lib/types'
+import { ChartDataPoint } from '@/lib/types'
 
 // D3 Bar Chart Component
 export interface D3BarChartProps {
@@ -47,8 +47,8 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({
       .attr('height', d => innerHeight - yScale(d.value))
       .attr('fill', d => {
         // Support dynamic colors per bar (for cash flow activity mode)
-        if ((d as any).isPositive !== undefined) {
-          return (d as any).isPositive ? '#10b981' : '#ef4444' // Green for positive, red for negative
+        if ((d as ChartDataPoint & { isPositive?: boolean }).isPositive !== undefined) {
+          return (d as ChartDataPoint & { isPositive?: boolean }).isPositive ? '#10b981' : '#ef4444' // Green for positive, red for negative
         }
         return color
       })
@@ -112,7 +112,7 @@ export const D3BarChart: React.FC<D3BarChartProps> = ({
           // React container handles tooltip hiding
         })
     }, 0)
-  }, [chartInternals, color])
+  }, [chartInternals, color, data, onDataPointHover])
 
   return <D3BaseChart ref={svgRef} data={data} width={width} height={height} className={className} onDataPointHover={onDataPointHover} />
 }
@@ -140,8 +140,7 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({
   const svgRef = useRef<SVGSVGElement>(null)
   const chartInternals = useD3Chart(svgRef)
   
-  // Detect if device is mobile
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  // Mobile detection removed - not currently used
 
   useEffect(() => {
     if (!chartInternals || !svgRef.current) return
@@ -245,7 +244,7 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({
     }, 0)
 
     // Data points removed for cleaner smooth line visualization
-  }, [chartInternals, color, showArea])
+  }, [chartInternals, color, showArea, data, onDataPointHover])
 
   return <D3BaseChart ref={svgRef} data={data} width={width} height={height} className={className} onDataPointHover={onDataPointHover} />
 }

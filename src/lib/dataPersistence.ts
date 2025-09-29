@@ -1,6 +1,4 @@
-import { 
-  ChartDataPointSchema, 
-  CashFlowDataPointSchema,
+import {
   ChartDataResponseSchema,
   CashFlowResponseSchema,
   type ChartDataPoint,
