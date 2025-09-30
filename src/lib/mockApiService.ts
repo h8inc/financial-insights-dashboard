@@ -29,8 +29,9 @@ class MockDataGenerator {
       const date = this.generateDateForPeriod(i, count, period)
       
       // Generate inflow and outflow with static patterns
-      const baseInflow = 8000 + (i % 3) * 1000 + (i % 7) * 200
-      const baseOutflow = 6000 + (i % 4) * 800 + (i % 5) * 150
+      // Fixed patterns to ensure more positive net flows for consistent green bars
+      const baseInflow = 10000 + (i % 3) * 1000 + (i % 7) * 200
+      const baseOutflow = 7000 + (i % 4) * 600 + (i % 5) * 100
       
       // Adjust amounts based on period
       const periodMultiplier = period === 'weekly' ? 7 : period === 'monthly' ? 30 : 1

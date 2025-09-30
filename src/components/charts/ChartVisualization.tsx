@@ -10,6 +10,7 @@ import { EmbeddedChartFilters } from './EmbeddedChartFilters'
 import { MobileChartLayout } from './MobileChartLayout'
 import { useResponsiveView } from '@/hooks/useResponsiveView'
 import { D3BarChart, D3LineChart } from './D3Charts'
+import { D3DualBarChart } from './D3DualBarChart'
 import { useMemo, useState, memo } from 'react'
 
 interface ChartVisualizationProps {
@@ -105,20 +106,11 @@ const ChartVisualizationComponent = ({ type, title }: ChartVisualizationProps) =
             <D3LineChart {...chartProps} data={chartData} color="#3b82f6" showArea={true} />
           )
         } else {
-          // Activity mode: Show inflow and outflow as separate bars
-          // For now, we'll show net flow (inflow - outflow) with color based on positive/negative
-          const chartData = cashFlowData.map(point => ({
-            ...point,
-            value: Math.abs(point.value), // Use absolute value for bar height
-            isPositive: point.value >= 0,
-            originalValue: point.value // Keep original value for tooltip
-          }))
-          
+          // Activity mode: Show dual bars for Money In (teal) and Money Out (orange)
           return (
-            <D3BarChart 
+            <D3DualBarChart 
               {...chartProps} 
-              data={chartData} 
-              color="#10b981" // Green for positive, will be overridden per bar
+              data={cashFlowData}
             />
           )
         }
@@ -266,7 +258,15 @@ const ChartVisualizationComponent = ({ type, title }: ChartVisualizationProps) =
                 })}
               </div>
               <div className="text-gray-300">
-                Value: ${((hoveredPoint as ChartDataPoint & { originalValue?: number }).originalValue ?? hoveredPoint.value).toLocaleString()}
+                {type === ChartType.CASH_FLOW && cashFlowMode === 'activity' ? (
+                  <>
+                    <div>Money In: ${((hoveredPoint as any).moneyIn || 0).toLocaleString()}</div>
+                    <div>Money Out: ${((hoveredPoint as any).moneyOut || 0).toLocaleString()}</div>
+                    <div>Net: ${((hoveredPoint as any).netFlow || hoveredPoint.value).toLocaleString()}</div>
+                  </>
+                ) : (
+                  `Value: ${((hoveredPoint as ChartDataPoint & { originalValue?: number }).originalValue ?? hoveredPoint.value).toLocaleString()}`
+                )}
               </div>
             </div>
           )}

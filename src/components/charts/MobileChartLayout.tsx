@@ -2,13 +2,14 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { TrendingUp, TrendingDown } from 'lucide-react'
-import { ChartType, ChartDataPoint } from '@/lib/types'
+import { ChartType, ChartDataPoint, CashFlowDataPoint } from '@/lib/types'
 import { useChartDataConsumer } from '@/hooks/useChartDataConsumer'
 import { useDeltaComparison } from '@/hooks/useDeltaComparison'
 import { MobileChartModeSwitcher } from './MobileChartModeSwitcher'
 import { MobileTimeFilter } from './MobileTimeFilter'
 import { useResponsiveView } from '@/hooks/useResponsiveView'
 import { D3BarChart, D3LineChart } from './D3Charts'
+import { D3DualBarChart } from './D3DualBarChart'
 import { useMemo, useState } from 'react'
 
 interface MobileChartLayoutProps {
@@ -20,7 +21,7 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
   const { cashFlowData, profitData, expensesData, revenueData, isLoading, cashFlowMode } = useChartDataConsumer()
   const { getCurrentDeltas } = useDeltaComparison()
   const { isMobileView } = useResponsiveView()
-  const [hoveredPoint, setHoveredPoint] = useState<ChartDataPoint | null>(null)
+  const [hoveredPoint, setHoveredPoint] = useState<CashFlowDataPoint | null>(null)
   
   const deltas = getCurrentDeltas()
   
@@ -91,15 +92,9 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
             <D3LineChart {...chartProps} data={currentData} color="#3b82f6" showArea={true} />
           )
         } else {
-          // Activity mode: Show bars with colors
-          const chartData = cashFlowData.map(point => ({
-            ...point,
-            value: Math.abs(point.value), // Use absolute value for bar height
-            isPositive: point.value >= 0,
-            originalValue: point.value // Keep original value for tooltip
-          }))
+          // Activity mode: Show dual bars for Money In (teal) and Money Out (orange)
           return (
-            <D3BarChart {...chartProps} data={chartData} color="#10b981" />
+            <D3DualBarChart {...chartProps} data={cashFlowData} />
           )
         }
       case ChartType.PROFIT:
@@ -130,7 +125,7 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
       default:
         return null
     }
-  }, [type, currentData, cashFlowData, cashFlowMode])
+  }, [type, cashFlowData, cashFlowMode])
 
   // Only render on mobile
   if (!isMobileView) {
@@ -199,7 +194,7 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
           </div>
           
           {/* Mobile legend for tapped data point */}
-          {hoveredPoint && (
+          {hoveredPoint ? (
             <div className="bg-gray-100 rounded-lg p-3 text-center">
               <div className="text-sm font-medium text-gray-900">
                 {new Date(hoveredPoint.date).toLocaleDateString('en-US', {
@@ -209,7 +204,27 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
                 })}
               </div>
               <div className="text-lg font-bold text-blue-600">
-                ${((hoveredPoint as ChartDataPoint & { originalValue?: number }).originalValue ?? hoveredPoint.value).toLocaleString()}
+                {type === ChartType.CASH_FLOW && cashFlowMode === 'activity' ? (
+                  <>
+                    <div>Money In: ${((hoveredPoint as any).moneyIn || 0).toLocaleString()}</div>
+                    <div>Money Out: ${((hoveredPoint as any).moneyOut || 0).toLocaleString()}</div>
+                    <div>Net: ${((hoveredPoint as any).netFlow || hoveredPoint.value).toLocaleString()}</div>
+                  </>
+                ) : (
+                  `$${((hoveredPoint as ChartDataPoint & { originalValue?: number }).originalValue ?? hoveredPoint.value).toLocaleString()}`
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="bg-gray-100 rounded-lg p-3 text-center">
+              <div className="text-sm font-medium text-gray-900">
+                Tap a period to view details
+              </div>
+              <div className="text-sm text-gray-600">
+                {type === ChartType.CASH_FLOW && cashFlowMode === 'activity' 
+                  ? 'Money In (teal) and Money Out (orange)'
+                  : 'Financial data'
+                }
               </div>
             </div>
           )}

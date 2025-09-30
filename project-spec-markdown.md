@@ -226,6 +226,90 @@ src/
 - Reference component specifications
 - Attach interaction behavior descriptions
 
+## Dual-Bar Cash Flow Enhancement PRD
+
+### Overview
+**🚨 LARGE CHANGE ALERT**: Major enhancement to cash flow visualization requiring careful implementation to preserve existing functionality.
+
+### Current State Analysis
+- **Desktop**: Hover tooltips on chart bars
+- **Mobile**: Tap shows data at top of chart
+- **Data**: Single net flow value per period
+- **Charts**: D3.js with React integration
+- **State**: Jotai atoms for data and interactions
+
+### Enhancement Requirements
+- **Dual-Bar Chart**: Money In (teal) and Money Out (orange) bars per period
+- **Financial Overview Cards**: Separate cards for received/expected money in/out
+- **Projected vs Historical Data**: Visual distinction between actual and projected periods
+- **Cross-Platform**: Maintain existing desktop hover and mobile tap interactions
+- **Responsive Design**: Consistent styling across mobile and desktop
+
+### Scope Assessment
+- **Files to Modify**: 8-10 files
+- **Data Changes**: Extend `CashFlowDataPoint` interface
+- **New Components**: 2-3 new components
+- **Risk Level**: ⚠️ **MODERATE RISK** - Preserve existing interactions
+
+### Success Criteria
+- **Dual-bar chart shows Money In (teal) and Money Out (orange)
+- **Desktop hover tooltips work for both bars
+- **Mobile tap shows data at top of chart
+- **Financial overview cards display correctly
+- **Responsive design works on all devices
+- **Existing functionality preserved
+- **Performance maintained
+
+### Implementation Plan
+
+#### Phase 1: Data Structure Enhancement (2-3 hours)
+**Files**: `src/lib/types.ts`, `src/lib/schemas.ts`, `src/lib/mockApiService.ts`
+- Extend `CashFlowDataPoint` with `isProjected` flag
+- Update mock data generator for projected data
+- Ensure positive net flows for consistency
+
+#### Phase 2: Chart Components (4-5 hours)
+**Files**: `src/components/charts/D3DualBarChart.tsx` (NEW), `src/components/charts/ChartVisualization.tsx`
+- Create dual-bar chart component
+- Update existing chart logic for activity mode
+- Add financial overview cards component
+
+#### Phase 3: Interactions (3-4 hours)
+**Files**: `src/components/charts/MobileChartLayout.tsx`, `src/components/charts/ResponsiveContainer.tsx`
+- Preserve desktop hover tooltips
+- Maintain mobile tap interactions
+- Add responsive behavior for dual bars
+
+#### Phase 4: Integration & Testing (2-3 hours)
+**Files**: `src/app/charts/cash-flow/page.tsx`, `src/components/DashboardCard.tsx`
+- Integrate new components
+- Test all interactions
+- Verify responsive behavior
+
+### Risk Mitigation
+- **Preserve Existing Functionality**: Desktop hover, mobile tap, balance mode
+- **Backward Compatibility**: Extend data types without breaking changes
+- **Testing Strategy**: Test each phase independently
+- **Performance**: Maintain current performance standards
+
+### Success Criteria
+- ✅ Dual-bar chart shows Money In (teal) and Money Out (orange)
+- ✅ Desktop hover tooltips work for both bars
+- ✅ Mobile tap shows data at top of chart
+- ✅ Financial overview cards display correctly
+- ✅ Responsive design works on all devices
+- ✅ Existing functionality preserved
+- ✅ Performance maintained
+
+### Timeline
+**Total**: 11-15 hours over 2-3 weeks
+- Phase 1: 2-3 hours (data structure)
+- Phase 2: 4-5 hours (chart components)
+- Phase 3: 3-4 hours (interactions)
+- Phase 4: 2-3 hours (integration and testing)
+
+---
+
 ## Development Strategy (Part-Time Friendly)
 
 ### Phase 1: Foundation (Week 1-2, 10-15 hours)
