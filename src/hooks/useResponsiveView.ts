@@ -50,7 +50,6 @@ export function useResponsiveView() {
     if (typeof window === 'undefined') return false
     
     const widthDifference = window.outerWidth - window.innerWidth
-    const heightDifference = window.outerHeight - window.innerHeight
     
     // Dev tools typically reduce width significantly but not height as much
     // Also check if the width reduction is substantial compared to screen size
@@ -65,9 +64,6 @@ export function useResponsiveView() {
     if (typeof window === 'undefined') return
     
     const width = window.innerWidth
-    const outerWidth = window.outerWidth
-    const userAgent = navigator.userAgent.toLowerCase()
-    const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent)
     const devToolsOpen = isDevToolsOpen()
     
     // Debug logging (removed for production)

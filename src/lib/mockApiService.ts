@@ -69,7 +69,7 @@ class MockDataGenerator {
       'revenue': { base: 15000, volatility: 0.25 }
     }
     
-    const { base, volatility } = baseValues[type]
+    const { base } = baseValues[type]
     
     for (let i = 0; i < count; i++) {
       const date = this.generateDateForPeriod(i, count, period)

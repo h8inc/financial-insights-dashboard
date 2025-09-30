@@ -3,7 +3,7 @@
 import React, { useRef, useEffect } from 'react'
 import * as d3 from 'd3'
 import { D3BaseChart, useD3Chart } from './D3BaseChart'
-import { CashFlowDataPoint } from '@/lib/types'
+import { CashFlowDataPoint, ChartDataPoint } from '@/lib/types'
 
 // D3 Dual Bar Chart Component for Cash Flow
 export interface D3DualBarChartProps {
@@ -41,28 +41,28 @@ export const D3DualBarChart: React.FC<D3DualBarChartProps> = ({
 
     // Create Money In bars (teal)
     g.selectAll('.money-in-bar')
-      .data(parsedData)
+      .data(parsedData as (CashFlowDataPoint & { parsedDate: Date })[])
       .enter()
       .append('rect')
       .attr('class', 'chart-element bar money-in-bar')
       .attr('x', d => (xScale(d.parsedDate)! - barWidth - barSpacing/2))
-      .attr('y', d => yScale((d as CashFlowDataPoint).inflow))
+      .attr('y', d => yScale(d.inflow))
       .attr('width', barWidth)
-      .attr('height', d => innerHeight - yScale((d as CashFlowDataPoint).inflow))
+      .attr('height', d => innerHeight - yScale(d.inflow))
       .attr('fill', '#10b981') // Teal for Money In
       .attr('rx', 4)
       .style('cursor', 'pointer')
 
     // Create Money Out bars (orange)
     g.selectAll('.money-out-bar')
-      .data(parsedData)
+      .data(parsedData as (CashFlowDataPoint & { parsedDate: Date })[])
       .enter()
       .append('rect')
       .attr('class', 'chart-element bar money-out-bar')
       .attr('x', d => (xScale(d.parsedDate)! + barSpacing/2))
-      .attr('y', d => yScale((d as CashFlowDataPoint).outflow))
+      .attr('y', d => yScale(d.outflow))
       .attr('width', barWidth)
-      .attr('height', d => innerHeight - yScale((d as CashFlowDataPoint).outflow))
+      .attr('height', d => innerHeight - yScale(d.outflow))
       .attr('fill', '#f97316') // Orange for Money Out
       .attr('rx', 4)
       .style('cursor', 'pointer')
@@ -76,7 +76,7 @@ export const D3DualBarChart: React.FC<D3DualBarChartProps> = ({
       
       g.selectAll('.hover-zone').remove()
       g.selectAll('.hover-zone')
-        .data(parsedData)
+        .data(parsedData as (CashFlowDataPoint & { parsedDate: Date })[])
         .enter()
         .append('rect')
         .attr('class', 'hover-zone')
@@ -113,7 +113,7 @@ export const D3DualBarChart: React.FC<D3DualBarChartProps> = ({
                 moneyIn: (originalPoint || d).inflow,
                 moneyOut: (originalPoint || d).outflow,
                 netFlow: (originalPoint || d).value
-              }
+              } as CashFlowDataPoint & { x: number; y: number }
               console.log('DUAL BAR CHART TOOLTIP:', pointWithPosition)
               onDataPointHover?.(pointWithPosition)
             }
@@ -127,5 +127,5 @@ export const D3DualBarChart: React.FC<D3DualBarChartProps> = ({
     }, 0)
   }, [chartInternals, data, onDataPointHover])
 
-  return <D3BaseChart ref={svgRef} data={data} width={width} height={height} className={className} onDataPointHover={onDataPointHover} />
+  return <D3BaseChart ref={svgRef} data={data} width={width} height={height} className={className} onDataPointHover={onDataPointHover as (point: ChartDataPoint | CashFlowDataPoint | null) => void} />
 }

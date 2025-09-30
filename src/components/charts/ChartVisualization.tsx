@@ -260,9 +260,9 @@ const ChartVisualizationComponent = ({ type, title }: ChartVisualizationProps) =
               <div className="text-gray-300">
                 {type === ChartType.CASH_FLOW && cashFlowMode === 'activity' ? (
                   <>
-                    <div>Money In: ${((hoveredPoint as any).moneyIn || 0).toLocaleString()}</div>
-                    <div>Money Out: ${((hoveredPoint as any).moneyOut || 0).toLocaleString()}</div>
-                    <div>Net: ${((hoveredPoint as any).netFlow || hoveredPoint.value).toLocaleString()}</div>
+                    <div>Money In: ${((hoveredPoint as CashFlowDataPoint).moneyIn || (hoveredPoint as CashFlowDataPoint).inflow || 0).toLocaleString()}</div>
+                    <div>Money Out: ${((hoveredPoint as CashFlowDataPoint).moneyOut || (hoveredPoint as CashFlowDataPoint).outflow || 0).toLocaleString()}</div>
+                    <div>Net: ${((hoveredPoint as CashFlowDataPoint).netFlow || hoveredPoint.value).toLocaleString()}</div>
                   </>
                 ) : (
                   `Value: ${((hoveredPoint as ChartDataPoint & { originalValue?: number }).originalValue ?? hoveredPoint.value).toLocaleString()}`

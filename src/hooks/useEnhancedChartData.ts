@@ -210,7 +210,7 @@ export const useEnhancedChartData = () => {
         setIsLoading(false)
       })
     }
-  }, [isInitialized, isLoading, fetchCashFlowData, fetchChartData, timeRange, cashFlowMode]) // Include all dependencies
+  }, [isInitialized, isLoading, fetchCashFlowData, fetchChartData, timeRange, cashFlowMode, setCashFlowData, setExpensesData, setProfitData, setRevenueData, setIsLoading]) // Include all dependencies
 
   // Watch for time range changes and reload data (but only if already initialized)
   useEffect(() => {

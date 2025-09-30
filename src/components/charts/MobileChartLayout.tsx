@@ -81,7 +81,7 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
       width: 400,
       height: 200,
       className: "w-full h-full",
-      onDataPointHover: setHoveredPoint
+      onDataPointHover: setHoveredPoint as (point: ChartDataPoint | CashFlowDataPoint | null) => void
     }
 
     switch (type) {
@@ -125,7 +125,7 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
       default:
         return null
     }
-  }, [type, cashFlowData, cashFlowMode])
+  }, [type, cashFlowData, cashFlowMode, currentData])
 
   // Only render on mobile
   if (!isMobileView) {
@@ -206,9 +206,9 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
               <div className="text-lg font-bold text-blue-600">
                 {type === ChartType.CASH_FLOW && cashFlowMode === 'activity' ? (
                   <>
-                    <div>Money In: ${((hoveredPoint as any).moneyIn || 0).toLocaleString()}</div>
-                    <div>Money Out: ${((hoveredPoint as any).moneyOut || 0).toLocaleString()}</div>
-                    <div>Net: ${((hoveredPoint as any).netFlow || hoveredPoint.value).toLocaleString()}</div>
+                    <div>Money In: ${((hoveredPoint as CashFlowDataPoint).moneyIn || (hoveredPoint as CashFlowDataPoint).inflow || 0).toLocaleString()}</div>
+                    <div>Money Out: ${((hoveredPoint as CashFlowDataPoint).moneyOut || (hoveredPoint as CashFlowDataPoint).outflow || 0).toLocaleString()}</div>
+                    <div>Net: ${((hoveredPoint as CashFlowDataPoint).netFlow || hoveredPoint.value).toLocaleString()}</div>
                   </>
                 ) : (
                   `$${((hoveredPoint as ChartDataPoint & { originalValue?: number }).originalValue ?? hoveredPoint.value).toLocaleString()}`
