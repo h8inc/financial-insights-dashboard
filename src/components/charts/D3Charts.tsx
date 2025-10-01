@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react'
 import * as d3 from 'd3'
 import { D3BaseChart, useD3Chart } from './D3BaseChart'
-import { ChartDataPoint } from '@/lib/types'
+import { ChartDataPoint, CashFlowDataPoint } from '@/lib/types'
 
 // D3 Bar Chart Component
 export interface D3BarChartProps {
@@ -153,9 +153,24 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({
     g.selectAll('.line-element').remove()
     g.selectAll('.hover-background').remove()
     g.selectAll('.hover-zone').remove()
+    g.selectAll('.divider-line').remove()
+    g.selectAll('.divider-label').remove()
+
+    // Split data into historical and projected (for Balance mode cash flow)
+    const isCashFlowBalance = (parsedData[0] as CashFlowDataPoint & { parsedDate: Date }).balance !== undefined
+    const firstProjectedIdx = (parsedData as (CashFlowDataPoint & { parsedDate: Date })[]).findIndex(p => (p as CashFlowDataPoint).isProjected)
+    const hasProjected = firstProjectedIdx > -1
+    
+    const historicalData = hasProjected ? parsedData.slice(0, firstProjectedIdx) : parsedData
+    const projectedData = hasProjected ? parsedData.slice(firstProjectedIdx) : []
 
     // Create line generator with smooth curve
     const line = d3.line<typeof parsedData[0]>()
+      .x(d => xScale(d.parsedDate))
+      .y(d => yScale(d.value))
+      .curve(d3.curveBasis)
+
+    const dashedLine = d3.line<typeof parsedData[0]>()
       .x(d => xScale(d.parsedDate))
       .y(d => yScale(d.value))
       .curve(d3.curveBasis)
@@ -176,14 +191,49 @@ export const D3LineChart: React.FC<D3LineChartProps> = ({
         .attr('fill-opacity', 0.2)
     }
 
-    // Add line
+    // Add historical solid line
     g.append('path')
-      .attr('class', 'line-element line')
-      .datum(parsedData)
+      .attr('class', 'line-element line historical-line')
+      .datum(historicalData)
       .attr('d', line)
       .attr('fill', 'none')
       .attr('stroke', color)
       .attr('stroke-width', 2)
+
+    // Add projected dashed line if present
+    if (hasProjected && projectedData.length > 0 && isCashFlowBalance) {
+      // Include last historical point to avoid gap
+      const connectedProjected = [historicalData[historicalData.length - 1], ...projectedData]
+      g.append('path')
+        .attr('class', 'line-element line projected-line')
+        .datum(connectedProjected)
+        .attr('d', dashedLine)
+        .attr('fill', 'none')
+        .attr('stroke', color)
+        .attr('stroke-width', 2)
+        .attr('stroke-dasharray', '6,4')
+
+      // Draw Today divider line and label
+      const firstProjected = projectedData[0] as typeof parsedData[0]
+      const dividerX = xScale(firstProjected.parsedDate)!
+      g.append('line')
+        .attr('class', 'divider-line')
+        .attr('x1', dividerX)
+        .attr('y1', 0)
+        .attr('x2', dividerX)
+        .attr('y2', innerHeight)
+        .attr('stroke', '#9ca3af')
+        .attr('stroke-dasharray', '4,4')
+        .attr('stroke-width', 1)
+
+      g.append('text')
+        .attr('class', 'divider-label')
+        .attr('x', dividerX + 6)
+        .attr('y', 14)
+        .text('Today')
+        .attr('fill', '#6b7280')
+        .style('font-size', '12px')
+    }
 
     // MOVE HOVER ZONES TO END - RENDER ON TOP OF EVERYTHING
     // Create invisible hover zones for each data point - NON-OVERLAPPING

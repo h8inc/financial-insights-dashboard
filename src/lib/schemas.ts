@@ -15,9 +15,13 @@ export const ChartDataPointSchema = z.object({
 export const CashFlowDataPointSchema = ChartDataPointSchema.extend({
   inflow: z.number().min(0, 'Inflow must be positive'),
   outflow: z.number().min(0, 'Outflow must be positive'),
-  balance: z.number()
+  balance: z.number(),
+  isProjected: z.boolean().optional()
 }).omit({ value: true }).extend({
   value: z.number() // Allow negative values for net flow
+}).extend({
+  expectedInflow: z.number().min(0).optional(),
+  expectedOutflow: z.number().min(0).optional()
 })
 
 // ==========================================

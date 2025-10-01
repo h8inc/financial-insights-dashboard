@@ -10,7 +10,7 @@ import { MobileTimeFilter } from './MobileTimeFilter'
 import { useResponsiveView } from '@/hooks/useResponsiveView'
 import { D3BarChart, D3LineChart } from './D3Charts'
 import { D3DualBarChart } from './D3DualBarChart'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useRef, useEffect } from 'react'
 
 interface MobileChartLayoutProps {
   type: ChartType
@@ -29,20 +29,8 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
   const getCurrentData = () => {
     switch (type) {
       case ChartType.CASH_FLOW:
-        // For cash flow, transform data based on mode
-        if (cashFlowMode === 'balance') {
-          // Return balance data as ChartDataPoint format
-          return cashFlowData.map(point => ({
-            date: point.date,
-            value: point.balance
-          }))
-        } else {
-          // Return net flow data (activity mode)
-          return cashFlowData.map(point => ({
-            date: point.date,
-            value: point.value
-          }))
-        }
+        // Return full cash flow data to preserve isProjected and other metadata
+        return cashFlowData
       case ChartType.PROFIT:
         return profitData
       case ChartType.EXPENSES:
@@ -73,12 +61,27 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
   const currentData = getCurrentData()
   const currentDelta = getCurrentDelta()
   
+  // Compute dynamic chart width for mobile (enables horizontal scroll when dense)
+  const numPoints = type === ChartType.CASH_FLOW ? cashFlowData.length : currentData.length
+  const chartWidth = Math.max(480, numPoints * 40)
+  
+  // Auto-scroll to the latest periods (rightmost) on mount/update
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    if (!isMobileView) return
+    const el = scrollContainerRef.current
+    if (!el) return
+    requestAnimationFrame(() => {
+      el.scrollLeft = el.scrollWidth
+    })
+  }, [isMobileView, chartWidth, type, cashFlowMode, currentData.length])
+  
   // Render D3 chart based on type and mode for mobile
   const renderMobileD3Chart = useMemo(() => {
     if (!currentData || currentData.length === 0) return null
 
     const chartProps = {
-      width: 400,
+      width: chartWidth,
       height: 200,
       className: "w-full h-full",
       onDataPointHover: setHoveredPoint as (point: ChartDataPoint | CashFlowDataPoint | null) => void
@@ -87,9 +90,10 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
     switch (type) {
       case ChartType.CASH_FLOW:
         if (cashFlowMode === 'balance') {
-          // Balance mode: Show line chart
+          // Balance mode: Show line chart with balance values
+          const balanceData = cashFlowData.map(point => ({ ...point, value: point.balance }))
           return (
-            <D3LineChart {...chartProps} data={currentData} color="#3b82f6" showArea={true} />
+            <D3LineChart {...chartProps} data={balanceData} color="#3b82f6" showArea={true} />
           )
         } else {
           // Activity mode: Show dual bars for Money In (teal) and Money Out (orange)
@@ -125,7 +129,7 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
       default:
         return null
     }
-  }, [type, cashFlowData, cashFlowMode, currentData])
+  }, [type, cashFlowData, cashFlowMode, currentData, chartWidth])
 
   // Only render on mobile
   if (!isMobileView) {
@@ -230,14 +234,16 @@ export const MobileChartLayout = ({ type, title }: MobileChartLayoutProps) => {
           )}
           
           {/* 3c. Chart Visualization - BELOW LEGEND */}
-          <div className="bg-gray-50 rounded-lg p-2">
-            {currentData && currentData.length > 0 ? (
-              renderMobileD3Chart
-            ) : (
-              <div className="flex items-center justify-center h-48">
-                <p className="text-gray-500">No data available</p>
-              </div>
-            )}
+          <div className="bg-gray-50 rounded-lg p-2 overflow-x-auto" ref={scrollContainerRef}>
+            <div style={{ width: chartWidth }}>
+              {currentData && currentData.length > 0 ? (
+                renderMobileD3Chart
+              ) : (
+                <div className="flex items-center justify-center h-48">
+                  <p className="text-gray-500">No data available</p>
+                </div>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

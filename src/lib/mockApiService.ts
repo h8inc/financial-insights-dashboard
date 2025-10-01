@@ -46,14 +46,156 @@ class MockDataGenerator {
         value: netFlow,
         inflow,
         outflow,
-        balance: Math.round(runningBalance)
+        balance: Math.round(runningBalance),
+        isProjected: false
       }
       
       // Validate the data point
       const validatedPoint = CashFlowDataPointSchema.parse(dataPoint)
       data.push(validatedPoint)
     }
-    
+    // Compute expected overlay for the current (last) historical period
+    if (data.length > 0) {
+      const lastIdx = data.length - 1
+      const last = data[lastIdx]
+      const lastDate = new Date(last.date)
+      const now = new Date()
+      // Only if last period is the current period bucket
+      const isSameBucket = (() => {
+        if (period === 'daily') return lastDate.toDateString() === now.toDateString()
+        if (period === 'weekly') {
+          const diffDays = Math.floor((now.getTime() - lastDate.getTime()) / (1000*60*60*24))
+          return diffDays >= 0 && diffDays < 7
+        }
+        if (period === 'monthly') return lastDate.getFullYear() === now.getFullYear() && lastDate.getMonth() === now.getMonth()
+        return false
+      })()
+
+      if (isSameBucket) {
+        const progress = (() => {
+          if (period === 'daily') return 1 // current day: treat as fully historical
+          if (period === 'weekly') {
+            const startOfWeek = new Date(now)
+            startOfWeek.setDate(now.getDate() - now.getDay())
+            const daysPassed = Math.max(1, now.getDay())
+            return Math.min(1, daysPassed / 7)
+          }
+          if (period === 'monthly') {
+            const day = now.getDate()
+            const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate()
+            return Math.min(1, Math.max(0.1, day / daysInMonth))
+          }
+          return 1
+        })()
+
+        // Scale actuals for the current period to reflect only elapsed time
+        const previousBalance = last.balance - last.value
+        const scaledInflow = Math.round(last.inflow * progress)
+        const scaledOutflow = Math.round(last.outflow * progress)
+        const scaledNet = scaledInflow - scaledOutflow
+        const adjustedCurrent = CashFlowDataPointSchema.parse({
+          ...last,
+          inflow: scaledInflow,
+          outflow: scaledOutflow,
+          value: scaledNet,
+          balance: previousBalance + scaledNet
+        })
+        data[lastIdx] = adjustedCurrent
+
+        // Option B: Blend between typical recent values and current pace, with caps
+        const lookback = 3
+        const recent = data.slice(-lookback - 1, -1) // exclude current last
+        const avgIn = recent.length ? Math.round(recent.reduce((s, p) => s + p.inflow, 0) / recent.length) : adjustedCurrent.inflow
+        const avgOut = recent.length ? Math.round(recent.reduce((s, p) => s + p.outflow, 0) / recent.length) : adjustedCurrent.outflow
+
+        // Current pace extrapolation
+        const paceIn = Math.round(adjustedCurrent.inflow / Math.max(0.1, progress))
+        const paceOut = Math.round(adjustedCurrent.outflow / Math.max(0.1, progress))
+
+        // Weight grows as the period progresses (gentle at start, faster near end)
+        const gamma = 2
+        const w = Math.pow(progress, gamma) // 0..1
+
+        let blendedIn = Math.round((1 - w) * avgIn + w * paceIn)
+        let blendedOut = Math.round((1 - w) * avgOut + w * paceOut)
+
+        // Caps to avoid spikes: 60% .. 140% of typical (average)
+        const minIn = Math.round(avgIn * 0.6)
+        const maxIn = Math.round(avgIn * 1.4)
+        const minOut = Math.round(avgOut * 0.6)
+        const maxOut = Math.round(avgOut * 1.4)
+
+        blendedIn = Math.min(maxIn, Math.max(minIn, blendedIn))
+        blendedOut = Math.min(maxOut, Math.max(minOut, blendedOut))
+
+        const expectedInflow = Math.max(adjustedCurrent.inflow, blendedIn)
+        const expectedOutflow = Math.max(adjustedCurrent.outflow, blendedOut)
+        data[lastIdx] = CashFlowDataPointSchema.parse({
+          ...adjustedCurrent,
+          expectedInflow,
+          expectedOutflow
+        })
+
+        // Ensure projections start from adjusted balance
+        runningBalance = data[lastIdx].balance
+      }
+    }
+
+    // Append projected periods based on timeRange mapping
+    const projectedCount = (() => {
+      switch (timeRange) {
+        case '7D':
+          return 2
+        case '30D':
+          return 3
+        case '3M':
+          return 2
+        case 'YTD':
+          return 2
+        default:
+          return 2
+      }
+    })()
+
+    // Extrapolation method: recent average of last 3 net flows (stable, demo-friendly)
+    const recentNetFlows = data.slice(-3).map(d => d.value)
+    const avgNetFlow = recentNetFlows.length
+      ? Math.round(recentNetFlows.reduce((a, b) => a + b, 0) / recentNetFlows.length)
+      : 0
+
+    for (let i = 0; i < projectedCount; i++) {
+      // Next period after the last actual point
+      const lastDate = new Date(data[data.length - 1].date)
+      const nextDate = new Date(lastDate)
+      if (period === 'daily') nextDate.setDate(lastDate.getDate() + 1)
+      if (period === 'weekly') nextDate.setDate(lastDate.getDate() + 7)
+      if (period === 'monthly') {
+        nextDate.setMonth(lastDate.getMonth() + 1)
+        nextDate.setDate(1)
+      }
+
+      // Split projected netFlow into inflow/outflow proportions based on recent ratio
+      const last = data[data.length - 1]
+      const inflowRatio = last.outflow === 0 ? 1 : Math.min(1.5, last.inflow / Math.max(1, last.outflow))
+      const projectedNet = avgNetFlow
+      const projectedInflow = Math.max(0, Math.round(projectedNet * Math.max(1, inflowRatio)))
+      const projectedOutflow = Math.max(0, projectedInflow - projectedNet)
+
+      runningBalance += projectedNet
+
+      const projectedPoint = CashFlowDataPointSchema.parse({
+        date: nextDate.toISOString().split('T')[0],
+        value: projectedNet,
+        inflow: projectedInflow,
+        outflow: projectedOutflow,
+        balance: Math.round(runningBalance),
+        isProjected: true,
+        expectedInflow: projectedInflow,
+        expectedOutflow: projectedOutflow
+      })
+      data.push(projectedPoint)
+    }
+
     return data
   }
 

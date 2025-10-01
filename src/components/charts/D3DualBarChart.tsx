@@ -39,7 +39,7 @@ export const D3DualBarChart: React.FC<D3DualBarChartProps> = ({
     const barWidth = Math.max(1, innerWidth / parsedData.length / 3) // Smaller width for dual bars
     const barSpacing = barWidth * 0.1 // Small gap between bars
 
-    // Create Money In bars (teal)
+    // Create Money In bars (teal) - actual to date
     g.selectAll('.money-in-bar')
       .data(parsedData as (CashFlowDataPoint & { parsedDate: Date })[])
       .enter()
@@ -49,11 +49,13 @@ export const D3DualBarChart: React.FC<D3DualBarChartProps> = ({
       .attr('y', d => yScale(d.inflow))
       .attr('width', barWidth)
       .attr('height', d => innerHeight - yScale(d.inflow))
-      .attr('fill', '#10b981') // Teal for Money In
+      .attr('fill', d => d.isProjected ? 'transparent' : '#10b981') // Teal for Money In
+      .attr('stroke', d => d.isProjected ? '#10b981' : 'none')
+      .attr('stroke-width', d => d.isProjected ? 2 : 0)
       .attr('rx', 4)
       .style('cursor', 'pointer')
 
-    // Create Money Out bars (orange)
+    // Create Money Out bars (orange) - actual to date
     g.selectAll('.money-out-bar')
       .data(parsedData as (CashFlowDataPoint & { parsedDate: Date })[])
       .enter()
@@ -63,12 +65,59 @@ export const D3DualBarChart: React.FC<D3DualBarChartProps> = ({
       .attr('y', d => yScale(d.outflow))
       .attr('width', barWidth)
       .attr('height', d => innerHeight - yScale(d.outflow))
-      .attr('fill', '#f97316') // Orange for Money Out
+      .attr('fill', d => d.isProjected ? 'transparent' : '#f97316') // Orange for Money Out
+      .attr('stroke', d => d.isProjected ? '#f97316' : 'none')
+      .attr('stroke-width', d => d.isProjected ? 2 : 0)
       .attr('rx', 4)
       .style('cursor', 'pointer')
 
+    // Overlay outlines for expected totals on current/future periods
+    g.selectAll('.money-in-expected')
+      .data(parsedData as (CashFlowDataPoint & { parsedDate: Date })[])
+      .enter()
+      .filter(d => (d.expectedInflow || 0) > d.inflow)
+      .append('rect')
+      .attr('class', 'chart-element bar money-in-expected')
+      .attr('x', d => (xScale(d.parsedDate)! - barWidth - barSpacing/2))
+      .attr('y', d => yScale(d.expectedInflow || d.inflow))
+      .attr('width', barWidth)
+      .attr('height', d => innerHeight - yScale(d.expectedInflow || d.inflow))
+      .attr('fill', 'transparent')
+      .attr('stroke', '#10b981')
+      .attr('stroke-width', 2)
+      .attr('rx', 4)
+
+    g.selectAll('.money-out-expected')
+      .data(parsedData as (CashFlowDataPoint & { parsedDate: Date })[])
+      .enter()
+      .filter(d => (d.expectedOutflow || 0) > d.outflow)
+      .append('rect')
+      .attr('class', 'chart-element bar money-out-expected')
+      .attr('x', d => (xScale(d.parsedDate)! + barSpacing/2))
+      .attr('y', d => yScale(d.expectedOutflow || d.outflow))
+      .attr('width', barWidth)
+      .attr('height', d => innerHeight - yScale(d.expectedOutflow || d.outflow))
+      .attr('fill', 'transparent')
+      .attr('stroke', '#f97316')
+      .attr('stroke-width', 2)
+      .attr('rx', 4)
+
     // Create hover zones for each period (covering both bars)
     const hoverZoneWidth = Math.min(barWidth * 3, innerWidth / parsedData.length * 0.8)
+
+    // Draw divider line at first projected point (no label for Activity)
+    const firstProjected = (parsedData as (CashFlowDataPoint & { parsedDate: Date })[]).find(p => p.isProjected)
+    if (firstProjected) {
+      const dividerX = xScale(firstProjected.parsedDate)!
+      g.append('line')
+        .attr('x1', dividerX)
+        .attr('y1', 0)
+        .attr('x2', dividerX)
+        .attr('y2', innerHeight)
+        .attr('stroke', '#9ca3af')
+        .attr('stroke-dasharray', '4,4')
+        .attr('stroke-width', 1)
+    }
     
     setTimeout(() => {
       const svg = d3.select(svgRef.current)
@@ -127,5 +176,9 @@ export const D3DualBarChart: React.FC<D3DualBarChartProps> = ({
     }, 0)
   }, [chartInternals, data, onDataPointHover])
 
-  return <D3BaseChart ref={svgRef} data={data} width={width} height={height} className={className} onDataPointHover={onDataPointHover as (point: ChartDataPoint | CashFlowDataPoint | null) => void} />
+  // Compute Y domain override based on max of inflow/outflow (guarantees both bars are visible)
+  const maxInOut = data.length ? Math.max(...data.map(d => Math.max(d.inflow, d.outflow, d.expectedInflow || 0, d.expectedOutflow || 0))) : 0
+  const yDomainOverride: [number, number] = [0, Math.max(1, maxInOut)]
+
+  return <D3BaseChart ref={svgRef} data={data} width={width} height={height} className={className} onDataPointHover={onDataPointHover as (point: ChartDataPoint | CashFlowDataPoint | null) => void} yDomainOverride={yDomainOverride} />
 }

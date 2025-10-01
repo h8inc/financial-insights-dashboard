@@ -11,6 +11,7 @@ interface D3BaseChartProps {
   className?: string
   margin?: { top: number; right: number; bottom: number; left: number }
   onDataPointHover?: (point: ChartDataPoint | CashFlowDataPoint | null) => void
+  yDomainOverride?: [number, number]
 }
 
 export const D3BaseChart = React.forwardRef<SVGSVGElement, D3BaseChartProps>(({
@@ -19,7 +20,8 @@ export const D3BaseChart = React.forwardRef<SVGSVGElement, D3BaseChartProps>(({
   height = 400,
   className = '',
   margin = { top: 20, right: 30, bottom: 40, left: 40 },
-  onDataPointHover
+  onDataPointHover,
+  yDomainOverride
 }, ref) => {
   const svgRef = useRef<SVGSVGElement>(null)
   // const [hoveredPoint, setHoveredPoint] = useState<ChartDataPoint | CashFlowDataPoint | null>(null) // Unused for now
@@ -54,9 +56,12 @@ export const D3BaseChart = React.forwardRef<SVGSVGElement, D3BaseChartProps>(({
       .domain(d3.extent(parsedData, d => d.parsedDate) as [Date, Date])
       .range([0, innerWidth])
 
+    const defaultYDomain = d3.extent(parsedData, d => d.value) as [number, number]
+    const yDomain: [number, number] = yDomainOverride || defaultYDomain
+
     const yScale = d3
       .scaleLinear()
-      .domain(d3.extent(parsedData, d => d.value) as [number, number])
+      .domain(yDomain)
       .nice()
       .range([innerHeight, 0])
 

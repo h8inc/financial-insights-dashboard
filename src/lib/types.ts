@@ -12,6 +12,9 @@ export interface CashFlowDataPoint extends ChartDataPoint {
   moneyIn?: number
   moneyOut?: number
   netFlow?: number
+  isProjected?: boolean
+  expectedInflow?: number
+  expectedOutflow?: number
 }
 
 export interface DeltaComparison {
